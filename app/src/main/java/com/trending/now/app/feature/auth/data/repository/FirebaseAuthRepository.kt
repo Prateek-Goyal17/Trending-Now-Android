@@ -1,6 +1,9 @@
 package com.trending.now.app.feature.auth.data.repository
 
 import android.content.Context
+import android.content.ContextWrapper
+import android.util.Log
+import androidx.activity.ComponentActivity
 import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
@@ -11,30 +14,34 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.trending.now.app.feature.auth.domain.model.AuthUser
+import com.trending.now.app.feature.auth.domain.model.NoGoogleCredentialException
 import com.trending.now.app.feature.auth.domain.repository.AuthRepository
 import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class FirebaseAuthRepository(
-    private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance(),
+@Singleton
+class FirebaseAuthRepository @Inject constructor(
+    private val firebaseAuth: FirebaseAuth,
 ) : AuthRepository {
     override suspend fun signInWithGoogle(
         context: Context,
         serverClientId: String,
     ): Result<AuthUser> {
         return runCatching {
+            Log.d(TAG, "Starting Google sign-in")
+            val activityContext = context.findActivity() ?: context
             val credential = getGoogleCredential(
-                context = context,
+                context = activityContext,
                 serverClientId = serverClientId,
                 filterByAuthorizedAccounts = true,
             ) ?: getGoogleCredential(
-                context = context,
+                context = activityContext,
                 serverClientId = serverClientId,
                 filterByAuthorizedAccounts = false,
             )
 
-            requireNotNull(credential) {
-                "No Google account credential was selected."
-            }
+            if (credential == null) throw NoGoogleCredentialException()
 
             val firebaseCredential = GoogleAuthProvider.getCredential(credential.idToken, null)
             val authResult = firebaseAuth.signInWithCredential(firebaseCredential).await()
@@ -43,6 +50,7 @@ class FirebaseAuthRepository(
             }
             val firebaseIdToken = firebaseUser.getIdToken(true).await().token
 
+            Log.d(TAG, "Google sign-in succeeded")
             AuthUser(
                 uid = firebaseUser.uid,
                 email = firebaseUser.email,
@@ -54,6 +62,7 @@ class FirebaseAuthRepository(
     }
 
     override suspend fun signOut(context: Context) {
+        Log.d(TAG, "Signing out")
         firebaseAuth.signOut()
         CredentialManager.create(context).clearCredentialState(ClearCredentialStateRequest())
     }
@@ -75,6 +84,7 @@ class FirebaseAuthRepository(
         val response = try {
             CredentialManager.create(context).getCredential(context, request)
         } catch (_: NoCredentialException) {
+            Log.d(TAG, "No Google credential available")
             return null
         }
 
@@ -87,5 +97,17 @@ class FirebaseAuthRepository(
         }
 
         error("Credential response was not a Google ID token.")
+    }
+
+    private tailrec fun Context.findActivity(): ComponentActivity? {
+        return when (this) {
+            is ComponentActivity -> this
+            is ContextWrapper -> baseContext.findActivity()
+            else -> null
+        }
+    }
+
+    private companion object {
+        const val TAG = "FirebaseAuthRepository"
     }
 }

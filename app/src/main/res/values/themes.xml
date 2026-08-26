@@ -6,6 +6,7 @@
         parent="android:style/Theme.Material.NoActionBar">
 
         <item name="android:windowNoTitle">true</item>
+        <item name="android:windowBackground">@color/trending_now_background</item>
 
         <item name="android:statusBarColor">
             @android:color/transparent

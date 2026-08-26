@@ -1,0 +1,87 @@
+{
+  "project_info": {
+    "project_number": "584029245724",
+    "project_id": "trending-now-71c3f",
+    "storage_bucket": "trending-now-71c3f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:584029245724:android:8f85a20f2cccfdfb776ad9",
+        "android_client_info": {
+          "package_name": "com.trending.now.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "584029245724-252hbg7r3jn0rv7gts2m5m9372jl2nc9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.trending.now.app",
+            "certificate_hash": "dda68687d8749d19837a424ee8b42d6e7d0bc5cd"
+          }
+        },
+        {
+          "client_id": "584029245724-5fcidojd6btrtgoq8sarr50oh8at1c8j.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.trending.now.app",
+            "certificate_hash": "c16c76f563a4bdb57bb8da2888709d95d5739922"
+          }
+        },
+        {
+          "client_id": "584029245724-5o6ehsji2e0pja9v3fh2sk0e29d9e0fv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.trending.now.app",
+            "certificate_hash": "6a2f673361286294e80753f5ea28ca64df3b2b74"
+          }
+        },
+        {
+          "client_id": "584029245724-7ks0tkk025r8ks8s28rtlmfknd785h4a.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.trending.now.app",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "584029245724-95glc77ssinktjso60cjfd8k6lr1qfi0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.trending.now.app",
+            "certificate_hash": "6a9c9f8416daae11b647c42e89e9c30aa014b411"
+          }
+        },
+        {
+          "client_id": "584029245724-o638keff2gqmrkidcr7a352kh65tm8bo.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.trending.now.app",
+            "certificate_hash": "9bb34c07d416029b8d5197a590cb0ffabde7e44e"
+          }
+        },
+        {
+          "client_id": "584029245724-de8s7ufo8qei1h9a82evsp57c659fdnt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAHzitTeXFim1f-goEGcYVR8EOR2CZv4dM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "584029245724-de8s7ufo8qei1h9a82evsp57c659fdnt.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
