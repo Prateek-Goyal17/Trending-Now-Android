@@ -54,6 +54,7 @@ dependencies {
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.navigation.compose)
     implementation(libs.firebase.auth)
     implementation(libs.googleid)
     implementation(libs.kotlinx.coroutines.play.services)

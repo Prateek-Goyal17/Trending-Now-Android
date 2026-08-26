@@ -8,7 +8,7 @@ enum class AppDestination(
     val label: String,
     @param:DrawableRes val icon: Int,
 ) {
-    Home("home", "Home", R.drawable.ic_home),
-    Creator("creators", "Creators", R.drawable.ic_creators),
-    Me("me", "Me", R.drawable.ic_me),
+    Home(AppRoute.HOME, "Home", R.drawable.ic_home),
+    Creator(AppRoute.CREATORS, "Creators", R.drawable.ic_creators),
+    Me(AppRoute.ME, "Me", R.drawable.ic_me),
 }

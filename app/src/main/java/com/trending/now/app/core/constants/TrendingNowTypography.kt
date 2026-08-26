@@ -7,11 +7,12 @@ import com.trending.now.app.R
 
 object TrendingNowTypography {
     val Inter = FontFamily(
-        Font(R.font.inter_variable, FontWeight.Normal),
-        Font(R.font.inter_variable, FontWeight.Medium),
-        Font(R.font.inter_variable, FontWeight.SemiBold),
-        Font(R.font.inter_variable, FontWeight.Bold),
-        Font(R.font.inter_variable, FontWeight.ExtraBold),
+        Font(R.font.inter_regular, FontWeight.Normal),
+        Font(R.font.inter_medium, FontWeight.Medium),
+        Font(R.font.inter_semibold, FontWeight.SemiBold),
+        Font(R.font.inter_bold, FontWeight.Bold),
+        Font(R.font.inter_extrabold, FontWeight.ExtraBold),
+        Font(R.font.inter_black, FontWeight.Black),
     )
 
     val Anton = FontFamily(
