@@ -11,8 +11,11 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.trending.now.app.core.constants.TrendingNowColors
 import com.trending.now.app.feature.me.presentation.components.CreatorConnectionCard
 import com.trending.now.app.feature.me.presentation.components.MeHeader
@@ -24,7 +27,10 @@ import com.trending.now.app.feature.me.presentation.components.TodayInYourWorld
 fun MeScreen(
     onLoginClick: () -> Unit,
     modifier: Modifier = Modifier,
+    viewModel: MeViewModel = hiltViewModel(),
 ) {
+    val profile by viewModel.profile.collectAsState()
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -35,7 +41,10 @@ fun MeScreen(
         verticalArrangement = Arrangement.spacedBy(18.dp),
     ) {
         MeHeader()
-        ProfileSignupCard(onSignUpClick = onLoginClick)
+        ProfileSignupCard(
+            profile = profile,
+            onSignUpClick = onLoginClick,
+        )
         TodayInYourWorld()
         CreatorConnectionCard()
         SupportAndPrivacy()

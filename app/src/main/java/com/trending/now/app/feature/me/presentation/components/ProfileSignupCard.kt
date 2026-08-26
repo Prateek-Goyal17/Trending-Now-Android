@@ -19,17 +19,35 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.trending.now.app.R
+import com.trending.now.app.core.common.components.GradientAccentButton
 import com.trending.now.app.core.constants.TrendingNowColors
 import com.trending.now.app.core.constants.TrendingNowTypography
+import com.trending.now.app.feature.auth.domain.model.AuthProfile
 
 @Composable
 fun ProfileSignupCard(
+    profile: AuthProfile?,
+    onSignUpClick: () -> Unit,
+) {
+    if (profile == null) {
+        SignupCard(onSignUpClick = onSignUpClick)
+    } else {
+        UserProfileCard(
+            profile = profile,
+            onEditProfileClick = onSignUpClick,
+        )
+    }
+}
+
+@Composable
+private fun SignupCard(
     onSignUpClick: () -> Unit,
 ) {
     Row(
@@ -54,10 +72,120 @@ fun ProfileSignupCard(
                 fontWeight = FontWeight.Medium,
                 fontFamily = TrendingNowTypography.Inter,
             )
-            SignUpButton(onClick = onSignUpClick)
+            GradientAccentButton(
+                text = "Sign Up",
+                onClick = onSignUpClick
+            )
         }
     }
 }
+
+@Composable
+private fun UserProfileCard(
+    profile: AuthProfile,
+    onEditProfileClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(10.dp))
+            .background(TrendingNowColors.CardSurface)
+            .border(1.dp, TrendingNowColors.CardBorder.copy(0.15f), RoundedCornerShape(10.dp))
+            .padding(vertical = 11.dp)
+            .padding(start = 21.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(19.dp),
+    ) {
+        InitialsAvatar(initials = profile.initials())
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.weight(1f),
+        ) {
+            Text(
+                text = profile.displayName(),
+                color = TrendingNowColors.CardTitle,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+                fontFamily = TrendingNowTypography.Inter,
+            )
+            GradientAccentButton(
+                text = "Edit Profile",
+                onClick = onEditProfileClick
+            )
+        }
+    }
+}
+
+@Composable
+private fun InitialsAvatar(
+    initials: String,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .size(76.dp)
+            .clip(CircleShape)
+            .background(Brush.verticalGradient(TrendingNowColors.UserProfileStrokeGradient))
+            .padding(2.5.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(CircleShape)
+                .background(TrendingNowColors.Background)
+                .padding(3.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(CircleShape)
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color(0xFF9426F0),
+                                Color(0xFF5B12C9),
+                            ),
+                        ),
+                    ),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = initials,
+                    color = TrendingNowColors.CardTitle,
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    fontFamily = TrendingNowTypography.Inter,
+                )
+            }
+        }
+    }
+}
+
+private fun AuthProfile.displayName(): String {
+    return username
+        ?: listOfNotNull(firstName, lastName)
+            .joinToString(" ")
+            .takeIf { it.isNotBlank() }
+        ?: email
+        ?: "User"
+}
+
+private fun AuthProfile.initials(): String {
+    val names = listOfNotNull(firstName, lastName)
+        .mapNotNull { name -> name.firstOrNull()?.uppercaseChar()?.toString() }
+        .take(2)
+        .joinToString("")
+
+    return names.takeIf { it.length == 2 }
+        ?: displayName()
+            .filter { it.isLetterOrDigit() }
+            .take(2)
+            .uppercase()
+            .ifBlank { "U" }
+}
+
 
 @Composable
 fun ProfilePlaceholder(

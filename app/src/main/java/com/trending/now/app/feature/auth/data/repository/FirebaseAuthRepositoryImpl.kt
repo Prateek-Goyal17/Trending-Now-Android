@@ -13,17 +13,19 @@ import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.trending.now.app.feature.auth.data.local.AuthSessionStore
 import com.trending.now.app.feature.auth.domain.model.AuthUser
 import com.trending.now.app.feature.auth.domain.model.NoGoogleCredentialException
-import com.trending.now.app.feature.auth.domain.repository.AuthRepository
+import com.trending.now.app.feature.auth.domain.repository.FirebaseAuthRepository
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class FirebaseAuthRepository @Inject constructor(
+class FirebaseAuthRepositoryImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
-) : AuthRepository {
+    private val authSessionStore: AuthSessionStore,
+) : FirebaseAuthRepository {
     override suspend fun signInWithGoogle(
         context: Context,
         serverClientId: String,
@@ -64,6 +66,7 @@ class FirebaseAuthRepository @Inject constructor(
     override suspend fun signOut(context: Context) {
         Log.d(TAG, "Signing out")
         firebaseAuth.signOut()
+        authSessionStore.clear()
         CredentialManager.create(context).clearCredentialState(ClearCredentialStateRequest())
     }
 

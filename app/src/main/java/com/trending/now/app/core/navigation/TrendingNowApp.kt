@@ -17,14 +17,18 @@ import androidx.navigation.compose.rememberNavController
 import com.trending.now.app.core.common.components.TrendingNowBottomBar
 import com.trending.now.app.core.common.components.TrendingNowSnackbarHost
 import com.trending.now.app.core.constants.TrendingNowColors
+import com.trending.now.app.feature.auth.presentation.AppAuthViewModel
 import com.trending.now.app.feature.auth.presentation.LoginScreen
 import com.trending.now.app.feature.creator.presentation.CreatorScreen
 import com.trending.now.app.feature.home.presentation.HomeScreen
 import com.trending.now.app.feature.me.presentation.MeScreen
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun TrendingNowApp() {
+    AuthSessionBootstrap()
+
     val navController = rememberNavController()
     val snackbarHostState = remember { SnackbarHostState() }
     val snackbarScope = rememberCoroutineScope()
@@ -98,3 +102,9 @@ fun TrendingNowApp() {
         }
     }
 }
+
+@Composable
+@Suppress("UNUSED_PARAMETER")
+private fun AuthSessionBootstrap(
+    viewModel: AppAuthViewModel = hiltViewModel(),
+) = Unit

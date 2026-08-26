@@ -6,4 +6,5 @@ data class RegisterOrLoginRequest(
     val username: String? = null,
     val firstName: String? = null,
     val lastName: String? = null,
+    val profileImage: String? = null,
 )

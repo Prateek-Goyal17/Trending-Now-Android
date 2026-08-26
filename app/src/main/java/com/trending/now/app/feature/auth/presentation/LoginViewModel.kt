@@ -10,7 +10,8 @@ import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.auth.FirebaseAuthException
 import com.trending.now.app.feature.auth.domain.model.AuthUser
 import com.trending.now.app.feature.auth.domain.model.NoGoogleCredentialException
-import com.trending.now.app.feature.auth.domain.repository.AuthRepository
+import com.trending.now.app.feature.auth.domain.repository.BackendAuthRepository
+import com.trending.now.app.feature.auth.domain.repository.FirebaseAuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,7 +33,8 @@ sealed interface LoginUiEvent {
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val authRepository: AuthRepository,
+    private val firebaseAuthRepository: FirebaseAuthRepository,
+    private val backendAuthRepository: BackendAuthRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
@@ -54,17 +56,15 @@ class LoginViewModel @Inject constructor(
 
         viewModelScope.launch {
             Log.d(TAG, "Google sign-in requested")
-            authRepository.signInWithGoogle(
+            firebaseAuthRepository.signInWithGoogle(
                 context = context,
                 serverClientId = serverClientId,
-            ).onSuccess { user ->
+            ).onSuccess { firebaseUser ->
                 Log.d(TAG, "Google sign-in completed")
-                _uiState.update {
-                    it.copy(
-                        isGoogleLoading = false,
-                        user = user,
-                    )
-                }
+                registerOrLoginWithBackend(
+                    context = context,
+                    firebaseUser = firebaseUser,
+                )
             }.onFailure { error ->
                 Log.d(TAG, "Google sign-in failed: ${error::class.java.simpleName}")
                 _uiState.update {
@@ -75,6 +75,30 @@ class LoginViewModel @Inject constructor(
                 _events.send(LoginUiEvent.ShowSnackbar(error.toLoginMessage()))
             }
         }
+    }
+
+    private suspend fun registerOrLoginWithBackend(
+        context: Context,
+        firebaseUser: AuthUser,
+    ) {
+        backendAuthRepository.registerOrLogin(firebaseUser)
+            .onSuccess {
+                _uiState.update {
+                    it.copy(
+                        isGoogleLoading = false,
+                        user = firebaseUser,
+                    )
+                }
+            }.onFailure { error ->
+                Log.d(TAG, "Backend login failed: ${error::class.java.simpleName}")
+                firebaseAuthRepository.signOut(context)
+                _uiState.update {
+                    it.copy(
+                        isGoogleLoading = false,
+                    )
+                }
+                _events.send(LoginUiEvent.ShowSnackbar(error.toBackendLoginMessage()))
+            }
     }
 
     fun consumeSignedInUser() {
@@ -90,6 +114,10 @@ class LoginViewModel @Inject constructor(
             is FirebaseAuthException -> "Google sign-in failed. Please try again."
             else -> "Unable to sign in with Google. Please try again."
         }
+    }
+
+    private fun Throwable.toBackendLoginMessage(): String {
+        return "Unable to complete login. Please try again."
     }
 
     private companion object {
