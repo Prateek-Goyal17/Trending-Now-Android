@@ -3,6 +3,8 @@ package com.trending.now.app.feature.me.presentation.components
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,7 +43,16 @@ import kotlin.io.path.Path
 
 
 @Composable
-fun TodayInYourWorld() {
+fun TodayInYourWorld(
+    followingValue: String,
+    savedValue: String,
+    myActivityValue: String,
+    timeSpentValue: String,
+    onFollowingClick: () -> Unit,
+    onSavedClick: () -> Unit,
+    onMyActivityClick: () -> Unit,
+    onTimeSpentClick: () -> Unit,
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -73,40 +85,48 @@ fun TodayInYourWorld() {
                 StatCard(
                     title = "Following",
                     subtitle = "Creators you follow",
+                    value = followingValue,
                     valueSuffix = null,
                     icon = R.drawable.ic_profile_following,
                     innerShadowColor = Color(0xFF3F132D),
                     gradient = TrendingNowColors.TodayFollowingGradient,
                     modifier = Modifier.weight(1f),
+                    onClick = onFollowingClick,
                 )
                 StatCard(
                     title = "Saved",
                     subtitle = "Posts saved",
+                    value = savedValue,
                     valueSuffix = null,
                     icon = R.drawable.ic_profile_saved,
                     innerShadowColor = Color(0xFF2B1142),
                     gradient = TrendingNowColors.TodaySavedGradient,
                     modifier = Modifier.weight(1f),
+                    onClick = onSavedClick,
                 )
             }
             Row(horizontalArrangement = Arrangement.spacedBy(22.dp)) {
                 StatCard(
                     title = "My Activity",
                     subtitle = "Today's interaction",
+                    value = myActivityValue,
                     valueSuffix = null,
                     icon = R.drawable.ic_profile_activity,
                     innerShadowColor = Color(0xFF3D1F1E),
                     gradient = TrendingNowColors.TodayActivityGradient,
                     modifier = Modifier.weight(1f),
+                    onClick = onMyActivityClick,
                 )
                 StatCard(
                     title = "Time spent",
                     subtitle = "Time in Trends",
+                    value = timeSpentValue,
                     valueSuffix = "hrs",
                     icon = R.drawable.ic_profile_time,
                     innerShadowColor = Color(0xFF25184C),
                     gradient = TrendingNowColors.TodayTimeSpentGradient,
                     modifier = Modifier.weight(1f),
+                    onClick = onTimeSpentClick,
                 )
             }
         }
@@ -117,10 +137,12 @@ fun TodayInYourWorld() {
 private fun StatCard(
     title: String,
     subtitle: String,
+    value: String,
     valueSuffix: String?,
     icon: Int,
     innerShadowColor: Color,
     gradient: List<Color>,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -139,6 +161,11 @@ private fun StatCard(
                 colors = gradient,
                 width = 1.dp,
                 cornerRadius = 8.dp,
+            )
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = onClick,
             )
             .padding(horizontal = 17.dp, vertical = 17.dp),
         verticalArrangement = Arrangement.SpaceBetween,
@@ -160,7 +187,7 @@ private fun StatCard(
         Column {
             Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
-                    text = "--",
+                    text = value,
                     color = TrendingNowColors.CardTitle,
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,

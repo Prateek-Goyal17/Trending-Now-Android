@@ -33,6 +33,9 @@ import com.trending.now.app.core.constants.TrendingNowTypography
 
 @Composable
 fun SupportAndPrivacy(
+    onReportProblemClick: () -> Unit,
+    onPrivacyPolicyClick: () -> Unit,
+    onCommunityGuidelineClick: () -> Unit,
     onLogoutClick: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -47,19 +50,19 @@ fun SupportAndPrivacy(
             title = "Report a Problem",
             prefixIcon = R.drawable.ic_report,
             suffixIcon = R.drawable.ic_right_arrow,
-            onClick = {}
+            onClick = onReportProblemClick
         )
         SettingsRow(
             title = "Privacy Policy",
             prefixIcon = R.drawable.ic_privacy,
             suffixIcon = R.drawable.ic_right_arrow,
-            onClick = {}
+            onClick = onPrivacyPolicyClick
         )
         SettingsRow(
             title = "Community Guideline",
             prefixIcon = R.drawable.ic_community,
             suffixIcon = R.drawable.ic_right_arrow,
-            onClick = {}
+            onClick = onCommunityGuidelineClick
         )
         SettingsRow(
             title = "Log out",

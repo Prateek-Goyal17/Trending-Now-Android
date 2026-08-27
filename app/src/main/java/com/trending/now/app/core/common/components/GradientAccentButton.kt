@@ -59,7 +59,7 @@ fun GradientAccentButton(
         Box(
             modifier = Modifier
                 .matchParentSize()
-                .offset(y = 3.dp)
+                .offset(y = 2.dp)
                 .clip(shape)
                 .background(
                     brush = Brush.horizontalGradient(
@@ -69,6 +69,7 @@ fun GradientAccentButton(
         )
 
         Button(
+            modifier = modifier,
             onClick = onClick,
             shape = shape,
             colors = ButtonDefaults.buttonColors(

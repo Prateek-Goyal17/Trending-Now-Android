@@ -1,8 +1,26 @@
 package com.trending.now.app.core.navigation
 
+import android.net.Uri
+
 object AppRoute {
+    const val WEB_VIEW_TITLE = "title"
+    const val WEB_VIEW_URL = "url"
+
     const val LOGIN = "login"
     const val HOME = "home"
     const val CREATORS = "creators"
     const val ME = "me"
+    const val FOLLOWING = "following"
+    const val SAVED = "saved"
+    const val MY_ACTIVITY = "my_activity"
+    const val TIME_SPENT = "time_spent"
+    const val REPORT_PROBLEM = "report_problem"
+    const val WEB_VIEW = "web_view/{$WEB_VIEW_TITLE}/{$WEB_VIEW_URL}"
+    const val PRIVACY_POLICY_URL = "https://example.com"
+    const val COMMUNITY_GUIDELINE_URL = "https://example.com"
+
+    fun webView(
+        title: String,
+        url: String,
+    ): String = "web_view/${Uri.encode(title)}/${Uri.encode(url)}"
 }

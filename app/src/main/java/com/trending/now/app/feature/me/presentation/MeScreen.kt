@@ -28,6 +28,7 @@ import com.trending.now.app.R
 import com.trending.now.app.core.common.bottom_sheet.AppBottomSheetConfig
 import com.trending.now.app.core.common.bottom_sheet.TrendingNowCommonBottomSheet
 import com.trending.now.app.core.constants.TrendingNowColors
+import com.trending.now.app.feature.auth.domain.model.AuthState
 import com.trending.now.app.feature.me.presentation.components.CreatorConnectionCard
 import com.trending.now.app.feature.me.presentation.components.MeHeader
 import com.trending.now.app.feature.me.presentation.components.ProfileSignupCard
@@ -37,13 +38,38 @@ import com.trending.now.app.feature.me.presentation.components.TodayInYourWorld
 @Composable
 fun MeScreen(
     onLoginClick: () -> Unit,
+    onFollowingClick: () -> Unit,
+    onSavedClick: () -> Unit,
+    onMyActivityClick: () -> Unit,
+    onTimeSpentClick: () -> Unit,
+    onReportProblemClick: () -> Unit,
+    onPrivacyPolicyClick: () -> Unit,
+    onCommunityGuidelineClick: () -> Unit,
+    onFindFavouritesClick: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: MeViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
     val authState by viewModel.authState.collectAsState()
     val logoutSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val restrictedActionSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showLogoutSheet by remember { mutableStateOf(false) }
+    var restrictedActionConfig by remember { mutableStateOf<AppBottomSheetConfig?>(null) }
+
+    fun handleTodayCardClick(
+        config: AppBottomSheetConfig,
+        onAuthenticatedClick: () -> Unit,
+    ) {
+        when (authState) {
+            is AuthState.NewUser,
+            is AuthState.OldUser,
+            -> onAuthenticatedClick()
+
+            AuthState.Guest,
+            AuthState.LoggedOut,
+            -> restrictedActionConfig = config
+        }
+    }
 
     Column(
         modifier = modifier
@@ -59,14 +85,50 @@ fun MeScreen(
             authState = authState,
             onSignUpClick = onLoginClick,
         )
-        TodayInYourWorld()
-        CreatorConnectionCard()
+        TodayInYourWorld(
+            followingValue = authState.authenticatedProfile()?.favoriteCreatorsCount?.toString() ?: "--",
+            savedValue = authState.authenticatedProfile()?.bookmarkPostsCount?.toString() ?: "--",
+            myActivityValue = authState.authenticatedProfile()?.likedNewsCount?.toString() ?: "--",
+            timeSpentValue = "--",
+            onFollowingClick = {
+                handleTodayCardClick(
+                    config = followingBottomSheetConfig(),
+                    onAuthenticatedClick = onFollowingClick,
+                )
+            },
+            onSavedClick = {
+                handleTodayCardClick(
+                    config = savedBottomSheetConfig(),
+                    onAuthenticatedClick = onSavedClick,
+                )
+            },
+            onMyActivityClick = {
+                handleTodayCardClick(
+                    config = myActivityBottomSheetConfig(),
+                    onAuthenticatedClick = onMyActivityClick,
+                )
+            },
+            onTimeSpentClick = {
+                handleTodayCardClick(
+                    config = timeSpentBottomSheetConfig(),
+                    onAuthenticatedClick = onTimeSpentClick,
+                )
+            },
+        )
+        CreatorConnectionCard(
+            authState = authState,
+            onSignUpClick = onLoginClick,
+            onFindFavouritesClick = onFindFavouritesClick,
+        )
         SupportAndPrivacy(
+            onReportProblemClick = onReportProblemClick,
+            onPrivacyPolicyClick = onPrivacyPolicyClick,
+            onCommunityGuidelineClick = onCommunityGuidelineClick,
             onLogoutClick = {
                 showLogoutSheet = true
             },
         )
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(80.dp))
     }
 
     if (showLogoutSheet) {
@@ -87,4 +149,62 @@ fun MeScreen(
             },
         )
     }
+
+    restrictedActionConfig?.let { config ->
+        TrendingNowCommonBottomSheet(
+            config = config,
+            sheetState = restrictedActionSheetState,
+            onDismiss = {
+                restrictedActionConfig = null
+            },
+            onPrimaryClick = {
+                restrictedActionConfig = null
+                onLoginClick()
+            },
+        )
+    }
+}
+
+private fun followingBottomSheetConfig(): AppBottomSheetConfig {
+    return AppBottomSheetConfig(
+        iconRes = R.drawable.ic_profile_following,
+        title = "Follow Your Favorite Creators",
+        description = "Create an account to follow creators and keep all their latest updates in one place.",
+        primaryButtonText = "Sign Up",
+    )
+}
+
+private fun AuthState.authenticatedProfile() = when (this) {
+    is AuthState.NewUser -> profile
+    is AuthState.OldUser -> profile
+    AuthState.Guest,
+    AuthState.LoggedOut,
+    -> null
+}
+
+private fun savedBottomSheetConfig(): AppBottomSheetConfig {
+    return AppBottomSheetConfig(
+        iconRes = R.drawable.ic_profile_saved,
+        title = "Build Your Collections",
+        description = "Save creator posts and we'll automatically organize them into your collections.",
+        primaryButtonText = "Sign Up",
+    )
+}
+
+private fun myActivityBottomSheetConfig(): AppBottomSheetConfig {
+    return AppBottomSheetConfig(
+        iconRes = R.drawable.ic_profile_activity,
+        title = "Join the Conversation",
+        description = "Create an account to comment, vote in polls, and keep track of your activity.",
+        primaryButtonText = "Sign Up",
+    )
+}
+
+private fun timeSpentBottomSheetConfig(): AppBottomSheetConfig {
+    return AppBottomSheetConfig(
+        iconRes = R.drawable.ic_profile_time,
+        title = "Track Your Creator Journey",
+        description = "Create an account to see your daily activity, usage insights, and creator habits.",
+        primaryButtonText = "Sign Up",
+    )
 }
