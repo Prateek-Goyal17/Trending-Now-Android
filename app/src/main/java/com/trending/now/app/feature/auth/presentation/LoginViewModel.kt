@@ -8,6 +8,7 @@ import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.NoCredentialException
 import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.auth.FirebaseAuthException
+import com.trending.now.app.feature.auth.data.local.AuthSessionStore
 import com.trending.now.app.feature.auth.domain.model.AuthUser
 import com.trending.now.app.feature.auth.domain.model.NoGoogleCredentialException
 import com.trending.now.app.feature.auth.domain.repository.BackendAuthRepository
@@ -35,6 +36,7 @@ sealed interface LoginUiEvent {
 class LoginViewModel @Inject constructor(
     private val firebaseAuthRepository: FirebaseAuthRepository,
     private val backendAuthRepository: BackendAuthRepository,
+    private val authSessionStore: AuthSessionStore,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
@@ -103,6 +105,11 @@ class LoginViewModel @Inject constructor(
 
     fun consumeSignedInUser() {
         _uiState.update { it.copy(user = null) }
+    }
+
+    fun continueAsGuest() {
+        Log.d(TAG, "Continue as guest")
+        authSessionStore.continueAsGuest()
     }
 
     private fun Throwable.toLoginMessage(): String {

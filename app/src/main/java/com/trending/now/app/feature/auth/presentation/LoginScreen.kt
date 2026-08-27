@@ -142,7 +142,10 @@ fun LoginScreen(
                         contentDescription = "Guest Icon"
                     )
                 },
-                onClick = onGuestClick,
+                onClick = {
+                    viewModel.continueAsGuest()
+                    onGuestClick()
+                },
             )
         }
     }

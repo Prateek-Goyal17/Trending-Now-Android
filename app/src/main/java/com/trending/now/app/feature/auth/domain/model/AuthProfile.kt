@@ -8,6 +8,9 @@ data class AuthProfile(
     val lastName: String?,
     val email: String?,
     val profileImage: String?,
+    val favoriteCreatorsCount: Int,
+    val bookmarkPostsCount: Int,
+    val likedNewsCount: Int,
 )
 
 fun BackendUser.toAuthProfile(): AuthProfile {
@@ -19,5 +22,8 @@ fun BackendUser.toAuthProfile(): AuthProfile {
         lastName = lastName,
         email = email,
         profileImage = profileImage,
+        favoriteCreatorsCount = favoriteCreatorsCount,
+        bookmarkPostsCount = bookmarkPostsCount,
+        likedNewsCount = likedNewsCount,
     )
 }

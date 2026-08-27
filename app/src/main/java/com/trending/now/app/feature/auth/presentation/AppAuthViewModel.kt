@@ -4,17 +4,25 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.trending.now.app.feature.auth.data.local.AuthSessionStore
+import com.trending.now.app.feature.auth.domain.model.AuthState
 import com.trending.now.app.feature.auth.domain.repository.BackendAuthRepository
 import com.trending.now.app.feature.auth.domain.repository.FirebaseAuthRepository
+import com.trending.now.app.feature.user.domain.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 @HiltViewModel
 class AppAuthViewModel @Inject constructor(
     private val backendAuthRepository: BackendAuthRepository,
     private val firebaseAuthRepository: FirebaseAuthRepository,
+    private val userRepository: UserRepository,
+    authSessionStore: AuthSessionStore,
 ) : ViewModel() {
+    val authState: StateFlow<AuthState> = authSessionStore.authState
+
     init {
         refreshCurrentUser()
     }
@@ -22,7 +30,7 @@ class AppAuthViewModel @Inject constructor(
     fun refreshCurrentUser() {
         viewModelScope.launch {
             Log.d(TAG, "Startup auth refresh requested")
-            backendAuthRepository.refreshCurrentUser()
+            userRepository.refreshCurrentUser()
         }
     }
 

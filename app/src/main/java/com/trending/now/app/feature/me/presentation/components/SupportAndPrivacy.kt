@@ -32,7 +32,9 @@ import com.trending.now.app.core.constants.TrendingNowColors
 import com.trending.now.app.core.constants.TrendingNowTypography
 
 @Composable
-fun SupportAndPrivacy() {
+fun SupportAndPrivacy(
+    onLogoutClick: () -> Unit,
+) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
             text = "Support & Privacy",
@@ -65,7 +67,7 @@ fun SupportAndPrivacy() {
             suffixIcon = R.drawable.ic_right_arrow,
             contentColor = Color(0xFFFD4C35),
             borderColor = Color(0xFFFD4C35),
-            onClick = {}
+            onClick = onLogoutClick
         )
 
     }

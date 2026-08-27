@@ -30,17 +30,25 @@ import com.trending.now.app.core.common.components.GradientAccentButton
 import com.trending.now.app.core.constants.TrendingNowColors
 import com.trending.now.app.core.constants.TrendingNowTypography
 import com.trending.now.app.feature.auth.domain.model.AuthProfile
+import com.trending.now.app.feature.auth.domain.model.AuthState
 
 @Composable
 fun ProfileSignupCard(
-    profile: AuthProfile?,
+    authState: AuthState,
     onSignUpClick: () -> Unit,
 ) {
-    if (profile == null) {
-        SignupCard(onSignUpClick = onSignUpClick)
-    } else {
-        UserProfileCard(
-            profile = profile,
+    when (authState) {
+        AuthState.Guest,
+        AuthState.LoggedOut,
+        -> SignupCard(onSignUpClick = onSignUpClick)
+
+        is AuthState.NewUser -> UserProfileCard(
+            profile = authState.profile,
+            onEditProfileClick = onSignUpClick,
+        )
+
+        is AuthState.OldUser -> UserProfileCard(
+            profile = authState.profile,
             onEditProfileClick = onSignUpClick,
         )
     }
