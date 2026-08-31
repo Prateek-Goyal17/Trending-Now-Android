@@ -10,6 +10,9 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 
 interface CreatorApiService {
+    @GET(TrendingNowApiPaths.CREATOR_SCREEN_FEED)
+    suspend fun getCreatorScreenFeed(): Response<CreatorScreenResponse>
+
     @GET(TrendingNowApiPaths.CREATOR_PAGE)
     suspend fun getCreatorPage(
         @Path("creator") creator: String,

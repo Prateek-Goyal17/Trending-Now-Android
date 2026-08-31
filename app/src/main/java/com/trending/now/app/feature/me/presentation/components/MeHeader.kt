@@ -1,17 +1,24 @@
 package com.trending.now.app.feature.me.presentation.components
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -25,7 +32,10 @@ import com.trending.now.app.core.constants.TrendingNowColors
 import com.trending.now.app.core.constants.TrendingNowTypography
 
 @Composable
-fun MeHeader() {
+fun MeHeader(
+    hasNotifications: Boolean = false,
+    onNotificationClick: () -> Unit = {},
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -36,11 +46,21 @@ fun MeHeader() {
         Box {
             Text(
                 text = buildAnnotatedString {
-                    withStyle(SpanStyle(color = TrendingNowColors.CardTitle)) {
+                    withStyle(
+                        SpanStyle(
+                            color = TrendingNowColors.CardTitle,
+                        ),
+                    ) {
                         append("Trending")
                     }
+
                     append("\n")
-                    withStyle(SpanStyle(color = TrendingNowColors.RisingCreatorTag)) {
+
+                    withStyle(
+                        SpanStyle(
+                            color = TrendingNowColors.RisingCreatorTag,
+                        ),
+                    ) {
                         append("Now")
                     }
                 },
@@ -50,6 +70,7 @@ fun MeHeader() {
                 fontWeight = FontWeight.W900,
                 fontFamily = TrendingNowTypography.Inter,
             )
+
             Image(
                 painter = painterResource(id = R.drawable.ic_electric),
                 contentDescription = "App Logo",
@@ -59,11 +80,37 @@ fun MeHeader() {
                     .align(Alignment.CenterEnd),
             )
         }
-        Icon(
-            painter = painterResource(id = R.drawable.ic_notification),
-            contentDescription = "Notifications",
-            modifier = Modifier.size(25.dp),
-            tint = TrendingNowColors.CardTitle,
-        )
+
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = onNotificationClick,
+                ),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_notification),
+                contentDescription = "Notifications",
+                modifier = Modifier.size(25.dp),
+                tint = TrendingNowColors.CardTitle,
+            )
+
+            if (hasNotifications) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .offset(
+                            x = (-3).dp,
+                            y = 4.dp,
+                        )
+                        .size(8.dp)
+                        .clip(CircleShape)
+                        .background(TrendingNowColors.RisingCreatorTag),
+                )
+            }
+        }
     }
 }
