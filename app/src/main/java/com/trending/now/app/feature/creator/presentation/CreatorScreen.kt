@@ -37,12 +37,15 @@ import com.trending.now.app.feature.creator.data.remote.favoriteCreatorCards
 import com.trending.now.app.feature.creator.data.remote.trendingNowPosts
 import com.trending.now.app.feature.creator.presentation.components.CreatorIntroCard
 import com.trending.now.app.feature.creator.presentation.components.CreatorIntroCardItem
-import com.trending.now.app.feature.creator.presentation.components.CreatorSuggestionsCard
+import com.trending.now.app.feature.creator.presentation.components.CreatorSuggestionCard
 import com.trending.now.app.feature.creator.presentation.components.TrendingVideoCard
 import com.trending.now.app.feature.creator.presentation.components.toCreatorSuggestionCardUiModel
 
 @Composable
 fun CreatorScreen(
+    onPersonalizeFeedClick: () -> Unit,
+    onTrendingVideoClick: () -> Unit,
+    onCreatorClick: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: CreatorViewModel = hiltViewModel(),
 ) {
@@ -90,7 +93,7 @@ fun CreatorScreen(
         if (introCards.isNotEmpty()) {
             CreatorIntroCard(
                 cards = introCards,
-                onPersonalizeClick = {},
+                onPersonalizeClick = onPersonalizeFeedClick,
             )
 
             Spacer(Modifier.height(35.dp))
@@ -118,6 +121,7 @@ fun CreatorScreen(
                         title = post.displayTitle(),
                         imageUrl = post.displayImageUrl(),
                         platform = post.platform.orEmpty(),
+                        onCardClick = onTrendingVideoClick,
                     )
                 }
             }
@@ -138,13 +142,13 @@ fun CreatorScreen(
 
             Spacer(Modifier.height(20.dp))
 
-            CreatorSuggestionsCard(
-                creatorSuggestion = creatorSuggestions.first().toCreatorSuggestionCardUiModel(),
-                onCardClick = {},
-                onExploreClick = {},
-                onInstagramClick = {},
-                onYoutubeClick = {},
-                onTwitterClick = {},
+            CreatorSuggestionCard(
+                creatorSuggestions = creatorSuggestions.map { suggestion ->
+                    suggestion.toCreatorSuggestionCardUiModel()
+                },
+                onExploreClick = { suggestion ->
+                    onCreatorClick(suggestion.creatorSlug)
+                },
             )
         }
 

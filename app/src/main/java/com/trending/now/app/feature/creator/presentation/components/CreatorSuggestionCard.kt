@@ -1,10 +1,20 @@
 package com.trending.now.app.feature.creator.presentation.components
 
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,10 +29,16 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
@@ -34,14 +50,18 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import coil3.compose.AsyncImage
 import com.trending.now.app.R
 import com.trending.now.app.core.common.components.GradientAccentButton
 import com.trending.now.app.core.constants.TrendingNowColors
 import com.trending.now.app.core.constants.TrendingNowTypography
 import com.trending.now.app.feature.creator.data.remote.CreatorSuggestionResponse
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 data class CreatorSuggestionCardUiModel(
+    val creatorSlug: String,
     val creatorName: String,
     val badgeType: CreatorSuggestionBadgeType,
     val role: String,
@@ -56,16 +76,29 @@ enum class CreatorSuggestionBadgeType {
 }
 
 @Composable
-fun CreatorSuggestionsCard(
-    creatorSuggestion: CreatorSuggestionCardUiModel,
+fun CreatorSuggestionCard(
+    creatorSuggestions: List<CreatorSuggestionCardUiModel>,
     modifier: Modifier = Modifier,
-    onCardClick: () -> Unit = {},
-    onExploreClick: () -> Unit = {},
-    onInstagramClick: () -> Unit = {},
-    onYoutubeClick: () -> Unit = {},
-    onTwitterClick: () -> Unit = {},
+    onExploreClick: (CreatorSuggestionCardUiModel) -> Unit = {},
 ) {
     val shape = RoundedCornerShape(20.dp)
+    var activeIndex by remember { mutableIntStateOf(0) }
+    val activeSuggestion = creatorSuggestions.getOrNull(activeIndex) ?: return
+
+    val exitDuration = 1600
+    val enterDuration = 1650
+
+    LaunchedEffect(creatorSuggestions.size) {
+        if (creatorSuggestions.size <= 1) {
+            return@LaunchedEffect
+        }
+
+        while (true) {
+            delay(3_000.milliseconds)
+
+            activeIndex = (activeIndex + 1) % creatorSuggestions.size
+        }
+    }
 
     Box(
         modifier = modifier
@@ -73,7 +106,6 @@ fun CreatorSuggestionsCard(
             .height(240.dp)
             .clip(shape)
             .background(color = TrendingNowColors.CreatorSuggestionCardAndTagBackground)
-            .clickable(onClick = onCardClick)
             .border(
                 width = 1.dp,
                 color = Color(0xFF442B33),
@@ -84,26 +116,76 @@ fun CreatorSuggestionsCard(
             modifier = Modifier
                 .padding(top = 17.dp, bottom = 18.dp, start = 24.dp),
         ) {
-
-            CreatorSuggestionBadge(badgeType = creatorSuggestion.badgeType)
+            AnimatedContent(
+                targetState = activeSuggestion.badgeType,
+                transitionSpec = {
+                    fadeIn(
+                        animationSpec = tween(durationMillis = 300),
+                    ) togetherWith fadeOut(
+                        animationSpec = tween(durationMillis = 220),
+                    )
+                },
+                label = "creatorSuggestionBadgeTransition",
+            ) { badgeType ->
+                CreatorSuggestionBadge(badgeType = badgeType)
+            }
 
             Spacer(Modifier.height(10.dp))
 
-            Text(
-                text = creatorSuggestion.creatorName,
-                style = TextStyle(
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Normal,
-                    fontFamily = TrendingNowTypography.Anton,
-                    color = Color.White,
-                    letterSpacing = 0.4.sp,
-                ),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            AnimatedContent(
+                targetState = activeIndex,
+                modifier = Modifier.zIndex(1f),
+                transitionSpec = {
+                    (
+                            (
+                                    slideInVertically(
+                                        animationSpec = tween(durationMillis = 1000),
+                                        initialOffsetY = { height ->
+                                            height
+                                        },
+                                    ) +
+                                            fadeIn(
+                                                animationSpec = tween(durationMillis = 700),
+                                            )
+                                    ) togetherWith
+                                    (
+                                            slideOutVertically(
+                                                animationSpec = tween(durationMillis = 1000),
+                                                targetOffsetY = { height ->
+                                                    -height
+                                                },
+                                            ) +
+                                                    fadeOut(
+                                                        animationSpec = tween(durationMillis = 600),
+                                                    )
+                                            )
+                            ).using(
+                            SizeTransform(
+                                clip = false,
+                            ),
+                        )
+                },
+                label = "creatorSuggestionNameTransition",
+            ) { index ->
+                val suggestion = creatorSuggestions.getOrNull(index)
+                    ?: return@AnimatedContent
+
+                Text(
+                    text = suggestion.creatorName,
+                    style = TextStyle(
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Normal,
+                        fontFamily = TrendingNowTypography.Anton,
+                        color = Color.White,
+                        letterSpacing = 0.4.sp,
+                    ),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
 
             Text(
-                text = creatorSuggestion.role,
+                text = activeSuggestion.role,
                 style = TextStyle(
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
@@ -118,7 +200,7 @@ fun CreatorSuggestionsCard(
             Spacer(Modifier.height(6.dp))
 
             Text(
-                text = creatorSuggestion.suggestionLine,
+                text = activeSuggestion.suggestionLine,
                 modifier = Modifier.fillMaxWidth(0.35f),
                 style = TextStyle(
                     fontSize = 10.sp,
@@ -142,32 +224,70 @@ fun CreatorSuggestionsCard(
                 suffixIcon = R.drawable.ic_right_arrow,
                 suffixIconSize = 10.dp,
                 suffixIconLeftPadding = 4.dp,
-                onClick = onExploreClick,
+                onClick = {
+                    onExploreClick(activeSuggestion)
+                },
             )
 
             Spacer(Modifier.weight(1f))
 
-            SocialIconRow(
-                onInstagramClick = onInstagramClick,
-                onYoutubeClick = onYoutubeClick,
-                onTwitterClick = onTwitterClick,
-            )
+            SocialIconRow()
 
         }
 
-        AsyncImage(
-            model = creatorSuggestion.suggestionImageUrl,
-            contentDescription = null,
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .height(275.dp),
-            contentScale = ContentScale.FillHeight,
-        )
+        AnimatedContent(
+            targetState = activeIndex,
+            modifier = Modifier.align(Alignment.BottomEnd),
+            contentAlignment = Alignment.BottomEnd,
+            transitionSpec = {
+                val enterTransition =
+                    scaleIn(
+                        initialScale = 0.22f,
+                        transformOrigin = TransformOrigin(1f, 1f),
+                        animationSpec = tween(
+                            durationMillis = enterDuration,
+                            easing = FastOutSlowInEasing,
+                        ),
+                    ) + fadeIn(
+                        animationSpec = tween(
+                            durationMillis = enterDuration,
+                        ),
+                    )
+
+                val exitTransition =
+                    scaleOut(
+                        targetScale = 0.22f,
+                        transformOrigin = TransformOrigin(1f, 1f),
+                        animationSpec = tween(
+                            durationMillis = exitDuration,
+                            easing = FastOutSlowInEasing,
+                        ),
+                    ) + fadeOut(
+                        animationSpec = tween(
+                            durationMillis = exitDuration,
+                        ),
+                    )
+
+                enterTransition togetherWith exitTransition
+            },
+            label = "creatorSuggestionImageTransition",
+        ) { index ->
+            val suggestion = creatorSuggestions.getOrNull(index)
+                ?: return@AnimatedContent
+
+            AsyncImage(
+                model = suggestion.suggestionImageUrl,
+                contentDescription = null,
+                modifier = Modifier.height(240.dp),
+                contentScale = ContentScale.FillHeight,
+            )
+        }
     }
 }
 
 fun CreatorSuggestionResponse.toCreatorSuggestionCardUiModel(): CreatorSuggestionCardUiModel {
     return CreatorSuggestionCardUiModel(
+        creatorSlug = creatorName.orEmpty(),
         creatorName = creatorName.toDisplayCreatorName(),
         badgeType = badge.toCreatorSuggestionBadgeType(),
         role = role.orEmpty(),
@@ -200,26 +320,19 @@ private fun CreatorSuggestionBadge(
 }
 
 @Composable
-private fun SocialIconRow(
-    onInstagramClick: () -> Unit = {},
-    onYoutubeClick: () -> Unit = {},
-    onTwitterClick: () -> Unit = {},
-) {
+private fun SocialIconRow() {
     Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
         CreatorSocialIcon(
             icon = R.drawable.ic_creator_instagram,
             contentDescription = "Instagram",
-            onClick = onInstagramClick,
         )
         CreatorSocialIcon(
             icon = R.drawable.ic_creator_youtube,
             contentDescription = "YouTube",
-            onClick = onYoutubeClick,
         )
         CreatorSocialIcon(
             icon = R.drawable.ic_creator_twitter,
             contentDescription = "Twitter",
-            onClick = onTwitterClick,
         )
     }
 }
@@ -228,14 +341,12 @@ private fun SocialIconRow(
 private fun CreatorSocialIcon(
     @DrawableRes icon: Int,
     contentDescription: String,
-    onClick: () -> Unit,
 ) {
     Image(
         painter = painterResource(icon),
         contentDescription = contentDescription,
         modifier = Modifier
             .size(32.dp)
-            .clickable(onClick = onClick),
     )
 }
 
