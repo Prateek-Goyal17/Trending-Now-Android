@@ -1,13 +1,22 @@
 package com.trending.now.app.feature.creator.presentation.components
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -33,6 +42,7 @@ fun TrendingVideoCard(
     imageUrl: String?,
     username: String,
     title: String,
+    platform: String,
     modifier: Modifier = Modifier,
     progress: Float = 0.12f,
     onCardClick: () -> Unit = {},
@@ -40,6 +50,8 @@ fun TrendingVideoCard(
     onPlatformClick: () -> Unit = {},
 ) {
     val cardShape = RoundedCornerShape(8.dp)
+    val platformIcon = platformIconFor(platform)
+    val platformLabel = platformLabelFor(platform)
 
     Box(
         modifier = modifier
@@ -49,7 +61,6 @@ fun TrendingVideoCard(
             .background(Color.Transparent)
             .clickable(onClick = onCardClick),
     ) {
-        // Backend image
         AsyncImage(
             model = imageUrl,
             contentDescription = title,
@@ -57,7 +68,6 @@ fun TrendingVideoCard(
             modifier = Modifier.fillMaxSize(),
         )
 
-        // Bottom gradient for text readability
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -73,7 +83,6 @@ fun TrendingVideoCard(
                 ),
         )
 
-        // Username
         Box(
             modifier = Modifier
                 .align(Alignment.TopStart)
@@ -114,7 +123,6 @@ fun TrendingVideoCard(
             )
         }
 
-        // Platform icon
         Box(
             modifier = Modifier
                 .align(Alignment.TopEnd)
@@ -128,17 +136,13 @@ fun TrendingVideoCard(
                 .clickable(onClick = onPlatformClick),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(
-                painter = painterResource(
-                    id = R.drawable.ic_instagram,
-                ),
-                contentDescription = "Instagram",
+            Image(
+                painter = painterResource(platformIcon),
+                contentDescription = platformLabel,
                 modifier = Modifier.size(14.dp),
-                tint = Color(0xFFFF4D67),
             )
         }
 
-        // Play button
         Box(
             modifier = Modifier
                 .align(Alignment.Center),
@@ -146,12 +150,11 @@ fun TrendingVideoCard(
         ) {
             Image(
                 painter = painterResource(R.drawable.ic_play),
-                contentDescription = "Play",
+                contentDescription = null,
                 modifier = Modifier.size(30.dp),
             )
         }
 
-        // Bottom content
         Column(
             modifier = Modifier
                 .align(Alignment.BottomStart)
@@ -181,6 +184,27 @@ fun TrendingVideoCard(
                 progress = progress,
             )
         }
+    }
+}
+
+@DrawableRes
+private fun platformIconFor(platform: String): Int {
+    return when (platform.lowercase()) {
+        "instagram", "ig" -> R.drawable.ic_instagram
+        "x", "twitter", "tw" -> R.drawable.ic_twitter
+        "youtube", "shorts", "short" -> R.drawable.ic_youtube
+        "news" -> R.drawable.ic_creator_news
+        else -> R.drawable.ic_creator_news
+    }
+}
+
+private fun platformLabelFor(platform: String): String {
+    return when (platform.lowercase()) {
+        "instagram", "ig" -> "Instagram"
+        "x", "twitter", "tw" -> "X"
+        "youtube", "shorts", "short" -> "YouTube"
+        "news" -> "News"
+        else -> "Platform"
     }
 }
 

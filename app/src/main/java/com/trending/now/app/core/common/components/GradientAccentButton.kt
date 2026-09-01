@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
@@ -28,7 +27,6 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.trending.now.app.core.constants.TrendingNowColors
@@ -41,7 +39,10 @@ fun GradientAccentButton(
     @DrawableRes suffixIcon: Int? = null,
     height: Dp = 33.dp,
     suffixIconSize: Dp = 16.dp,
+    suffixIconLeftPadding: Dp = 8.dp,
     contentPadding: PaddingValues = PaddingValues(horizontal = 33.dp),
+    textFontSize: Double? = null,
+    textFontWeight: FontWeight? = null,
     onClick: () -> Unit = {},
 ) {
     val shape = RoundedCornerShape(6.dp)
@@ -100,15 +101,15 @@ fun GradientAccentButton(
                             append(text)
                         }
                     },
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontSize = textFontSize?.sp ?: 14.sp,
+                    fontWeight = textFontWeight ?: FontWeight.Bold,
                     fontFamily = TrendingNowTypography.Inter,
                     letterSpacing = 0.4.sp
                 )
 
                 suffixIcon?.let { icon ->
                     Spacer(
-                        modifier = Modifier.width(8.dp),
+                        modifier = Modifier.width(suffixIconLeftPadding),
                     )
 
                     Image(
