@@ -66,13 +66,13 @@ fun TrendingNowApp() {
                 )
             }
         },
-    ) { _ ->
+    ) { paddingValues ->
         NavHost(
             navController = navController,
             startDestination = AppRoute.HOME,
         ) {
             composable(AppRoute.HOME) {
-                HomeScreen()
+                HomeScreen(contentPadding = paddingValues)
             }
             composable(AppRoute.CREATORS) {
                 CreatorScreen()
