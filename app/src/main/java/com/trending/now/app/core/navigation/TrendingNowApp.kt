@@ -27,7 +27,7 @@ import com.trending.now.app.feature.auth.presentation.LoginScreen
 import com.trending.now.app.feature.creator.presentation.CreatorDetailScreen
 import com.trending.now.app.feature.creator.presentation.CreatorScreen
 import com.trending.now.app.feature.creator.presentation.CreatorVideoFeedScreen
-import com.trending.now.app.feature.creator.presentation.PickFavoriteCreatorsScreen
+import com.trending.now.app.feature.creator.presentation.PickFavoriteCreatorsRoute
 import com.trending.now.app.feature.home.presentation.HomeScreen
 import com.trending.now.app.feature.me.presentation.FollowingScreen
 import com.trending.now.app.feature.me.presentation.MeScreen
@@ -91,7 +91,19 @@ fun TrendingNowApp() {
                 )
             }
             composable(AppRoute.PICK_FAVORITE_CREATORS) {
-                PickFavoriteCreatorsScreen()
+                PickFavoriteCreatorsRoute(
+                    onBack = {
+                        navController.popBackStack()
+                    },
+                    onSignUp = {
+                        navController.navigate(AppRoute.LOGIN) {
+                            launchSingleTop = true
+                        }
+                    },
+                    onCompleted = {
+                        navController.popBackStack()
+                    },
+                )
             }
             composable(AppRoute.CREATOR_VIDEO_FEED) {
                 CreatorVideoFeedScreen()

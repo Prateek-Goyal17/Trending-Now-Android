@@ -2,6 +2,7 @@ package com.trending.now.app.feature.creator.data.repository
 
 import android.util.Log
 import com.trending.now.app.feature.creator.data.remote.CreatorApiService
+import com.trending.now.app.feature.creator.data.remote.FavoriteCreatorRequest
 import com.trending.now.app.feature.creator.data.remote.CreatorScreenResponse
 import com.trending.now.app.feature.creator.domain.repository.CreatorRepository
 import javax.inject.Inject
@@ -23,6 +24,22 @@ class CreatorRepositoryImpl @Inject constructor(
             creatorScreenResponse
         }.onFailure { error ->
             Log.d(TAG, "Creator screen feed failed: ${error::class.java.simpleName}")
+        }
+    }
+
+    override suspend fun addFavoriteCreator(creatorId: String): Result<Unit> {
+        return runCatching {
+            val response = creatorApiService.addFavoriteCreator(
+                body = FavoriteCreatorRequest(creatorId = creatorId),
+            )
+            if (!response.isSuccessful) {
+                error("Request failed with code ${response.code()}.")
+            }
+
+            response.body()?.close()
+            Unit
+        }.onFailure { error ->
+            Log.d(TAG, "Add favorite creator failed: ${error::class.java.simpleName}")
         }
     }
 

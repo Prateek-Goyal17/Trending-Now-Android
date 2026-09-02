@@ -13,7 +13,7 @@ import retrofit2.http.Path
 
 interface GenreApiService {
     @GET(TrendingNowApiPaths.GENRES)
-    suspend fun getGenres(): Response<ResponseBody>
+    suspend fun getGenres(): Response<GenreResponse>
 
     @POST(TrendingNowApiPaths.GENRES)
     suspend fun addGenre(
