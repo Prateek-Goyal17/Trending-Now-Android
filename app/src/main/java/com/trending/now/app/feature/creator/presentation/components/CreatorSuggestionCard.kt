@@ -3,7 +3,9 @@ package com.trending.now.app.feature.creator.presentation.components
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -23,6 +25,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -48,6 +51,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -85,8 +89,8 @@ fun CreatorSuggestionCard(
     var activeIndex by remember { mutableIntStateOf(0) }
     val activeSuggestion = creatorSuggestions.getOrNull(activeIndex) ?: return
 
-    val exitDuration = 1600
-    val enterDuration = 1650
+    val exitDuration = 1200
+    val enterDuration = 1250
 
     LaunchedEffect(creatorSuggestions.size) {
         if (creatorSuggestions.size <= 1) {
@@ -94,194 +98,301 @@ fun CreatorSuggestionCard(
         }
 
         while (true) {
-            delay(3_000.milliseconds)
+            delay(5_000.milliseconds)
 
             activeIndex = (activeIndex + 1) % creatorSuggestions.size
         }
     }
 
-    Box(
+    Column(
         modifier = modifier
-            .fillMaxWidth()
-            .height(240.dp)
-            .clip(shape)
-            .background(color = TrendingNowColors.CreatorSuggestionCardAndTagBackground)
-            .border(
-                width = 1.dp,
-                color = Color(0xFF442B33),
-                shape = shape,
-            ),
+            .fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Column(
+        Box(
             modifier = Modifier
-                .padding(top = 17.dp, bottom = 18.dp, start = 24.dp),
+                .fillMaxWidth()
+                .height(240.dp)
+                .clip(shape)
+                .background(color = TrendingNowColors.CreatorSuggestionCardAndTagBackground)
+                .border(
+                    width = 1.dp,
+                    color = Color(0xFF442B33),
+                    shape = shape,
+                ),
         ) {
-            AnimatedContent(
-                targetState = activeSuggestion.badgeType,
-                transitionSpec = {
-                    fadeIn(
-                        animationSpec = tween(durationMillis = 300),
-                    ) togetherWith fadeOut(
-                        animationSpec = tween(durationMillis = 220),
-                    )
-                },
-                label = "creatorSuggestionBadgeTransition",
-            ) { badgeType ->
-                CreatorSuggestionBadge(badgeType = badgeType)
-            }
-
-            Spacer(Modifier.height(10.dp))
-
-            AnimatedContent(
-                targetState = activeIndex,
-                modifier = Modifier.zIndex(1f),
-                transitionSpec = {
-                    (
-                            (
-                                    slideInVertically(
-                                        animationSpec = tween(durationMillis = 1000),
-                                        initialOffsetY = { height ->
-                                            height
-                                        },
-                                    ) +
-                                            fadeIn(
-                                                animationSpec = tween(durationMillis = 700),
-                                            )
-                                    ) togetherWith
-                                    (
-                                            slideOutVertically(
-                                                animationSpec = tween(durationMillis = 1000),
-                                                targetOffsetY = { height ->
-                                                    -height
-                                                },
-                                            ) +
-                                                    fadeOut(
-                                                        animationSpec = tween(durationMillis = 600),
-                                                    )
-                                            )
-                            ).using(
-                            SizeTransform(
-                                clip = false,
-                            ),
+            Column(
+                modifier = Modifier
+                    .padding(top = 17.dp, bottom = 18.dp, start = 24.dp),
+            ) {
+                AnimatedContent(
+                    targetState = activeSuggestion.badgeType,
+                    transitionSpec = {
+                        fadeIn(
+                            animationSpec = tween(durationMillis = 300),
+                        ) togetherWith fadeOut(
+                            animationSpec = tween(durationMillis = 220),
                         )
-                },
-                label = "creatorSuggestionNameTransition",
-            ) { index ->
-                val suggestion = creatorSuggestions.getOrNull(index)
-                    ?: return@AnimatedContent
+                    },
+                    label = "creatorSuggestionBadgeTransition",
+                ) { badgeType ->
+                    CreatorSuggestionBadge(badgeType = badgeType)
+                }
+
+                Spacer(Modifier.height(10.dp))
+
+                AnimatedContent(
+                    targetState = activeIndex,
+                    modifier = Modifier.zIndex(1f),
+                    transitionSpec = {
+                        (
+                                (
+                                        slideInVertically(
+                                            animationSpec = tween(durationMillis = 1000),
+                                            initialOffsetY = { height ->
+                                                height
+                                            },
+                                        ) +
+                                                fadeIn(
+                                                    animationSpec = tween(durationMillis = 700),
+                                                )
+                                        ) togetherWith
+                                        (
+                                                slideOutVertically(
+                                                    animationSpec = tween(durationMillis = 1000),
+                                                    targetOffsetY = { height ->
+                                                        -height
+                                                    },
+                                                ) +
+                                                        fadeOut(
+                                                            animationSpec = tween(durationMillis = 600),
+                                                        )
+                                                )
+                                ).using(
+                                SizeTransform(
+                                    clip = false,
+                                ),
+                            )
+                    },
+                    label = "creatorSuggestionNameTransition",
+                ) { index ->
+                    val suggestion = creatorSuggestions.getOrNull(index)
+                        ?: return@AnimatedContent
+
+                    Text(
+                        text = suggestion.creatorName,
+                        style = TextStyle(
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Normal,
+                            fontFamily = TrendingNowTypography.Anton,
+                            color = Color.White,
+                            letterSpacing = 0.4.sp,
+                        ),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
 
                 Text(
-                    text = suggestion.creatorName,
+                    text = activeSuggestion.role,
                     style = TextStyle(
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Normal,
-                        fontFamily = TrendingNowTypography.Anton,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        fontFamily = TrendingNowTypography.Inter,
                         color = Color.White,
                         letterSpacing = 0.4.sp,
                     ),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
+
+                Spacer(Modifier.height(6.dp))
+
+                Text(
+                    text = activeSuggestion.suggestionLine,
+                    modifier = Modifier.fillMaxWidth(0.35f),
+                    style = TextStyle(
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Medium,
+                        fontFamily = TrendingNowTypography.Inter,
+                        color = Color(0xFFB6B6B6),
+                        letterSpacing = 0.4.sp,
+                    ),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+
+                Spacer(Modifier.weight(1f))
+
+                GradientAccentButton(
+                    text = "Explore",
+                    contentPadding = PaddingValues(horizontal = 15.dp),
+                    height = 25.dp,
+                    textFontSize = 12.0,
+                    textFontWeight = FontWeight.SemiBold,
+                    suffixIcon = R.drawable.ic_right_arrow,
+                    suffixIconSize = 10.dp,
+                    suffixIconLeftPadding = 4.dp,
+                    onClick = {
+                        onExploreClick(activeSuggestion)
+                    },
+                )
+
+                Spacer(Modifier.weight(1f))
+
+                SocialIconRow()
+
             }
 
-            Text(
-                text = activeSuggestion.role,
-                style = TextStyle(
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    fontFamily = TrendingNowTypography.Inter,
-                    color = Color.White,
-                    letterSpacing = 0.4.sp,
-                ),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            AnimatedContent(
+                targetState = activeIndex,
+                modifier = Modifier.align(Alignment.BottomEnd),
+                contentAlignment = Alignment.BottomEnd,
+                transitionSpec = {
+                    val enterTransition =
+                        scaleIn(
+                            initialScale = 0.22f,
+                            transformOrigin = TransformOrigin(1f, 1f),
+                            animationSpec = tween(
+                                durationMillis = enterDuration,
+                                easing = FastOutSlowInEasing,
+                            ),
+                        ) + fadeIn(
+                            animationSpec = tween(
+                                durationMillis = enterDuration,
+                            ),
+                        )
 
-            Spacer(Modifier.height(6.dp))
+                    val exitTransition =
+                        scaleOut(
+                            targetScale = 0.22f,
+                            transformOrigin = TransformOrigin(1f, 1f),
+                            animationSpec = tween(
+                                durationMillis = exitDuration,
+                                easing = FastOutSlowInEasing,
+                            ),
+                        ) + fadeOut(
+                            animationSpec = tween(
+                                durationMillis = exitDuration,
+                            ),
+                        )
 
-            Text(
-                text = activeSuggestion.suggestionLine,
-                modifier = Modifier.fillMaxWidth(0.35f),
-                style = TextStyle(
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Medium,
-                    fontFamily = TrendingNowTypography.Inter,
-                    color = Color(0xFFB6B6B6),
-                    letterSpacing = 0.4.sp,
-                ),
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-            )
-
-            Spacer(Modifier.weight(1f))
-
-            GradientAccentButton(
-                text = "Explore",
-                contentPadding = PaddingValues(horizontal = 15.dp),
-                height = 25.dp,
-                textFontSize = 12.0,
-                textFontWeight = FontWeight.SemiBold,
-                suffixIcon = R.drawable.ic_right_arrow,
-                suffixIconSize = 10.dp,
-                suffixIconLeftPadding = 4.dp,
-                onClick = {
-                    onExploreClick(activeSuggestion)
+                    enterTransition togetherWith exitTransition
                 },
-            )
+                label = "creatorSuggestionImageTransition",
+            ) { index ->
+                val suggestion = creatorSuggestions.getOrNull(index)
+                    ?: return@AnimatedContent
 
-            Spacer(Modifier.weight(1f))
-
-            SocialIconRow()
-
+                AsyncImage(
+                    model = suggestion.suggestionImageUrl,
+                    contentDescription = null,
+                    modifier = Modifier.height(240.dp),
+                    contentScale = ContentScale.FillHeight,
+                )
+            }
         }
 
-        AnimatedContent(
-            targetState = activeIndex,
-            modifier = Modifier.align(Alignment.BottomEnd),
-            contentAlignment = Alignment.BottomEnd,
-            transitionSpec = {
-                val enterTransition =
-                    scaleIn(
-                        initialScale = 0.22f,
-                        transformOrigin = TransformOrigin(1f, 1f),
-                        animationSpec = tween(
-                            durationMillis = enterDuration,
-                            easing = FastOutSlowInEasing,
-                        ),
-                    ) + fadeIn(
-                        animationSpec = tween(
-                            durationMillis = enterDuration,
-                        ),
-                    )
+        CreatorSuggestionPagerIndicator(
+            activeIndex = activeIndex,
+            count = creatorSuggestions.size,
+        )
+    }
+}
 
-                val exitTransition =
-                    scaleOut(
-                        targetScale = 0.22f,
-                        transformOrigin = TransformOrigin(1f, 1f),
-                        animationSpec = tween(
-                            durationMillis = exitDuration,
-                            easing = FastOutSlowInEasing,
-                        ),
-                    ) + fadeOut(
-                        animationSpec = tween(
-                            durationMillis = exitDuration,
-                        ),
-                    )
+@Composable
+private fun CreatorSuggestionPagerIndicator(
+    activeIndex: Int,
+    count: Int,
+) {
+    if (count <= 1) {
+        return
+    }
 
-                enterTransition togetherWith exitTransition
-            },
-            label = "creatorSuggestionImageTransition",
-        ) { index ->
-            val suggestion = creatorSuggestions.getOrNull(index)
-                ?: return@AnimatedContent
+    val dotWidth = 9.dp
+    val activeWidth = 17.dp
+    val indicatorHeight = 8.dp
+    val spacing = 5.dp
+    val activeExtraWidth = activeWidth - dotWidth
+    val totalWidth = dotWidth * count + spacing * (count - 1) + activeExtraWidth
+    val activeOffset by animateDpAsState(
+        targetValue = indicatorOffset(
+            index = activeIndex,
+            activeIndex = activeIndex,
+            dotWidth = dotWidth,
+            spacing = spacing,
+            activeExtraWidth = activeExtraWidth,
+        ),
+        animationSpec = tween(
+            durationMillis = 1200,
+            easing = FastOutSlowInEasing,
+        ),
+        label = "creatorSuggestionActiveIndicatorOffset",
+    )
 
-            AsyncImage(
-                model = suggestion.suggestionImageUrl,
-                contentDescription = null,
-                modifier = Modifier.height(240.dp),
-                contentScale = ContentScale.FillHeight,
+    Box(
+        modifier = Modifier.padding(top = 10.dp),
+        contentAlignment = Alignment.CenterStart,
+    ) {
+        repeat(count) { index ->
+            if (index == activeIndex) {
+                return@repeat
+            }
+
+            val inactiveOffset by animateDpAsState(
+                targetValue = indicatorOffset(
+                    index = index,
+                    activeIndex = activeIndex,
+                    dotWidth = dotWidth,
+                    spacing = spacing,
+                    activeExtraWidth = activeExtraWidth,
+                ),
+                animationSpec = tween(
+                    durationMillis = 1200,
+                    easing = FastOutSlowInEasing,
+                ),
+                label = "creatorSuggestionInactiveIndicatorOffset",
+            )
+
+            Box(
+                modifier = Modifier
+                    .offset(x = inactiveOffset)
+                    .width(dotWidth)
+                    .height(indicatorHeight)
+                    .clip(RoundedCornerShape(percent = 50))
+                    .background(Color(0xFF747474))
             )
         }
+
+        Box(
+            modifier = Modifier
+                .width(totalWidth)
+                .height(indicatorHeight),
+        )
+
+        Box(
+            modifier = Modifier
+                .offset(x = activeOffset)
+                .width(activeWidth)
+                .height(indicatorHeight)
+                .clip(RoundedCornerShape(percent = 50))
+                .background(TrendingNowColors.RisingCreatorTag),
+        )
+    }
+}
+
+private fun indicatorOffset(
+    index: Int,
+    activeIndex: Int,
+    dotWidth: Dp,
+    spacing: Dp,
+    activeExtraWidth: Dp,
+): Dp {
+    val baseOffset = (dotWidth + spacing) * index
+    return if (index > activeIndex) {
+        baseOffset + activeExtraWidth
+    } else {
+        baseOffset
     }
 }
 
