@@ -5,6 +5,7 @@ import com.trending.now.app.core.network.TrendingNowRetrofitFactory
 import com.trending.now.app.feature.auth.data.local.AuthSessionStore
 import com.trending.now.app.feature.auth.data.remote.AuthApiService
 import com.trending.now.app.feature.creator.data.remote.CreatorApiService
+import com.trending.now.app.feature.genre.data.remote.GenreApiService
 import com.trending.now.app.feature.home.data.remote.HomeApiService
 import dagger.Binds
 import dagger.Module
@@ -45,6 +46,12 @@ object NetworkModule {
     @Singleton
     fun provideCreatorApiService(retrofit: Retrofit): CreatorApiService {
         return retrofit.create(CreatorApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideGenreApiService(retrofit: Retrofit): GenreApiService {
+        return retrofit.create(GenreApiService::class.java)
     }
 
     @Provides

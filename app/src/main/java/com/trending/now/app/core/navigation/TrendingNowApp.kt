@@ -24,7 +24,10 @@ import com.trending.now.app.core.common.components.TrendingNowSnackbarHost
 import com.trending.now.app.core.constants.TrendingNowColors
 import com.trending.now.app.feature.auth.presentation.AppAuthViewModel
 import com.trending.now.app.feature.auth.presentation.LoginScreen
+import com.trending.now.app.feature.creator.presentation.CreatorDetailScreen
 import com.trending.now.app.feature.creator.presentation.CreatorScreen
+import com.trending.now.app.feature.creator.presentation.CreatorVideoFeedScreen
+import com.trending.now.app.feature.creator.presentation.PickFavoriteCreatorsRoute
 import com.trending.now.app.feature.home.presentation.HomeScreen
 import com.trending.now.app.feature.me.presentation.FollowingScreen
 import com.trending.now.app.feature.me.presentation.MeScreen
@@ -75,7 +78,49 @@ fun TrendingNowApp() {
                 HomeScreen(contentPadding = paddingValues)
             }
             composable(AppRoute.CREATORS) {
-                CreatorScreen()
+                CreatorScreen(
+                    onPersonalizeFeedClick = {
+                        navController.navigate(AppRoute.PICK_FAVORITE_CREATORS)
+                    },
+                    onTrendingVideoClick = {
+                        navController.navigate(AppRoute.CREATOR_VIDEO_FEED)
+                    },
+                    onCreatorClick = { creatorSlug ->
+                        navController.navigate(AppRoute.creatorDetail(creatorSlug))
+                    },
+                )
+            }
+            composable(AppRoute.PICK_FAVORITE_CREATORS) {
+                PickFavoriteCreatorsRoute(
+                    onBack = {
+                        navController.popBackStack()
+                    },
+                    onSignUp = {
+                        navController.navigate(AppRoute.LOGIN) {
+                            launchSingleTop = true
+                        }
+                    },
+                    onCompleted = {
+                        navController.popBackStack()
+                    },
+                )
+            }
+            composable(AppRoute.CREATOR_VIDEO_FEED) {
+                CreatorVideoFeedScreen()
+            }
+            composable(
+                route = AppRoute.CREATOR_DETAIL,
+                arguments = listOf(
+                    navArgument(AppRoute.CREATOR_SLUG) {
+                        type = NavType.StringType
+                    },
+                ),
+            ) { backStackEntry ->
+                CreatorDetailScreen(
+                    creatorSlug = Uri.decode(
+                        backStackEntry.arguments?.getString(AppRoute.CREATOR_SLUG).orEmpty(),
+                    ),
+                )
             }
             composable(AppRoute.ME) {
                 MeScreen(

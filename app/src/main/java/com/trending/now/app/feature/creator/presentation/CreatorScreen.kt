@@ -32,17 +32,23 @@ import com.trending.now.app.core.constants.TrendingNowColors
 import com.trending.now.app.core.constants.TrendingNowTypography
 import com.trending.now.app.feature.creator.data.remote.CreatorPostMediaResponse
 import com.trending.now.app.feature.creator.data.remote.CreatorTrendingPostResponse
+import com.trending.now.app.feature.creator.data.remote.buzzingCards
 import com.trending.now.app.feature.creator.data.remote.creatorSuggestions
 import com.trending.now.app.feature.creator.data.remote.favoriteCreatorCards
 import com.trending.now.app.feature.creator.data.remote.trendingNowPosts
+import com.trending.now.app.feature.creator.presentation.components.CreatorBuzzCard
 import com.trending.now.app.feature.creator.presentation.components.CreatorIntroCard
 import com.trending.now.app.feature.creator.presentation.components.CreatorIntroCardItem
-import com.trending.now.app.feature.creator.presentation.components.CreatorSuggestionsCard
+import com.trending.now.app.feature.creator.presentation.components.CreatorSuggestionCard
 import com.trending.now.app.feature.creator.presentation.components.TrendingVideoCard
+import com.trending.now.app.feature.creator.presentation.components.toCreatorBuzzCardUiModel
 import com.trending.now.app.feature.creator.presentation.components.toCreatorSuggestionCardUiModel
 
 @Composable
 fun CreatorScreen(
+    onPersonalizeFeedClick: () -> Unit,
+    onTrendingVideoClick: () -> Unit,
+    onCreatorClick: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: CreatorViewModel = hiltViewModel(),
 ) {
@@ -63,6 +69,12 @@ fun CreatorScreen(
         .orEmpty()
 
     val creatorSuggestions = creatorScreenFeed?.creatorSuggestions().orEmpty()
+    val buzzingCards = creatorScreenFeed
+        ?.buzzingCards()
+        .orEmpty()
+        .mapNotNull { buzzCard ->
+            buzzCard.toCreatorBuzzCardUiModel()
+        }
 
     var searchText by rememberSaveable {
         mutableStateOf("")
@@ -90,7 +102,7 @@ fun CreatorScreen(
         if (introCards.isNotEmpty()) {
             CreatorIntroCard(
                 cards = introCards,
-                onPersonalizeClick = {},
+                onPersonalizeClick = onPersonalizeFeedClick,
             )
 
             Spacer(Modifier.height(35.dp))
@@ -118,6 +130,7 @@ fun CreatorScreen(
                         title = post.displayTitle(),
                         imageUrl = post.displayImageUrl(),
                         platform = post.platform.orEmpty(),
+                        onCardClick = onTrendingVideoClick,
                     )
                 }
             }
@@ -138,14 +151,41 @@ fun CreatorScreen(
 
             Spacer(Modifier.height(20.dp))
 
-            CreatorSuggestionsCard(
-                creatorSuggestion = creatorSuggestions.first().toCreatorSuggestionCardUiModel(),
-                onCardClick = {},
-                onExploreClick = {},
-                onInstagramClick = {},
-                onYoutubeClick = {},
-                onTwitterClick = {},
+            CreatorSuggestionCard(
+                creatorSuggestions = creatorSuggestions.map { suggestion ->
+                    suggestion.toCreatorSuggestionCardUiModel()
+                },
+                onExploreClick = { suggestion ->
+                    onCreatorClick(suggestion.creatorSlug)
+                },
             )
+
+            Spacer(Modifier.height(35.dp))
+        }
+
+        if (buzzingCards.isNotEmpty()) {
+            Text(
+                text = "What's Buzzing This Week",
+                style = TextStyle(
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    fontFamily = TrendingNowTypography.Inter,
+                    color = TrendingNowColors.CardTitle,
+                ),
+            )
+
+            Spacer(Modifier.height(20.dp))
+
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                items(items = buzzingCards, key = { buzzCard -> buzzCard.id }) { buzzCard ->
+                    CreatorBuzzCard(
+                        buzzCard = buzzCard,
+                        modifier = Modifier.height(225.dp),
+                    )
+                }
+            }
         }
 
         Spacer(Modifier.height(90.dp))
