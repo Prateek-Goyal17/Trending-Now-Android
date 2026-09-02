@@ -42,6 +42,7 @@ import androidx.compose.ui.draw.innerShadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -110,243 +111,259 @@ fun CreatorIntroCard(
             .fillMaxWidth()
             .height(275.dp)
             .clip(shape)
-            .background(color = TrendingNowColors.CreatorSuggestionCardAndTagBackground)
-            .innerShadow(
-                shape = shape,
-                shadow = Shadow(
-                    radius = 8.dp,
-                    spread = 0.dp,
-                    color = TrendingNowColors.RisingCreatorTag,
-                    offset = DpOffset(
-                        x = 0.5.dp,
-                        y = 0.5.dp,
-                    ),
-                ),
-            )
-            .border(
-                width = 1.dp,
-                color = Color.Black,
-                shape = shape,
-            ),
+
     ) {
-        Column(
+        Image(
+            painter = painterResource(R.drawable.pink_gradient_bg),
+            contentDescription = "Background",
+            contentScale = ContentScale.FillBounds
+        )
+        Box(
             modifier = Modifier
-                .padding(top = 27.dp, bottom = 33.dp, start = 24.dp),
+                .fillMaxWidth()
+                .height(275.dp)
+                .clip(shape)
+                .innerShadow(
+                    shape = shape,
+                    shadow = Shadow(
+                        radius = 8.dp,
+                        spread = 0.dp,
+                        color = TrendingNowColors.RisingCreatorTag,
+                        offset = DpOffset(
+                            x = 0.5.dp,
+                            y = 0.5.dp,
+                        ),
+                    ),
+                )
+                .border(
+                    width = 1.dp,
+                    color = Color.Black,
+                    shape = shape,
+                ),
         ) {
+            Column(
+                modifier = Modifier
+                    .padding(top = 27.dp, bottom = 33.dp, start = 24.dp),
+            ) {
+                AnimatedContent(
+                    targetState = activeIndex,
+                    modifier = Modifier.zIndex(1f),
+                    transitionSpec = {
+                        (
+                                (
+                                        slideInVertically(
+                                            animationSpec = tween(durationMillis = 1000),
+                                            initialOffsetY = { height ->
+                                                height
+                                            },
+                                        ) +
+                                                fadeIn(
+                                                    animationSpec = tween(durationMillis = 700),
+                                                )
+                                        ) togetherWith
+                                        (
+                                                slideOutVertically(
+                                                    animationSpec = tween(durationMillis = 1000),
+                                                    targetOffsetY = { height ->
+                                                        -height
+                                                    },
+                                                ) +
+                                                        fadeOut(
+                                                            animationSpec = tween(durationMillis = 600),
+                                                        )
+                                                )
+                                ).using(
+                                SizeTransform(
+                                    clip = false,
+                                ),
+                            )
+                    },
+                    label = "creatorTextTransition",
+                ) { index ->
+
+                    val card = cards.getOrNull(index)
+                        ?: return@AnimatedContent
+
+                    Text(
+                        text = card.title,
+                        modifier = Modifier.fillMaxWidth(0.6f),
+                        style = TextStyle(
+                            fontSize = 22.sp,
+                            lineHeight = 26.sp,
+                            fontWeight = FontWeight.Normal,
+                            fontFamily = TrendingNowTypography.Anton,
+                            color = TrendingNowColors.CardTitle,
+                        ),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+
+                Spacer(Modifier.height(13.dp))
+
+                Text(
+                    text = activeCard.description,
+                    modifier = Modifier
+                        .fillMaxWidth(0.47f)
+                        .zIndex(0f),
+                    style = TextStyle(
+                        fontSize = 12.sp,
+                        lineHeight = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = TrendingNowTypography.Inter,
+                        color = Color(0xFFB6B6B6),
+                    ),
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Spacer(Modifier.height(30.dp))
+
+                SocialIconRow()
+
+                Spacer(Modifier.height(12.dp))
+
+                GradientAccentButton(
+                    text = "Personalize Feed",
+                    contentPadding = PaddingValues(horizontal = 15.dp),
+                    onClick = onPersonalizeClick,
+                )
+            }
+
             AnimatedContent(
                 targetState = activeIndex,
-                modifier = Modifier.zIndex(1f),
+                modifier = Modifier.align(Alignment.BottomEnd),
                 transitionSpec = {
-                    (
+                    when (animationType) {
+
+                        // --------------------------------------------------
+                        // 1.
+                        // OLD: EXIT DOWN
+                        // NEW: RIGHT -> LEFT
+                        // --------------------------------------------------
+                        0 -> {
+                            (
+                                    slideInHorizontally(
+                                        animationSpec = tween(
+                                            durationMillis = enterDuration,
+                                            delayMillis = enterDelay,
+                                            easing = FastOutSlowInEasing,
+                                        ),
+                                        initialOffsetX = { width ->
+                                            width
+                                        },
+                                    ) togetherWith
+                                            slideOutVertically(
+                                                animationSpec = tween(
+                                                    durationMillis = exitDuration,
+                                                    easing = FastOutSlowInEasing,
+                                                ),
+                                                targetOffsetY = { height ->
+                                                    height
+                                                },
+                                            )
+                                    ).using(
+                                    SizeTransform(
+                                        clip = false,
+                                    ),
+                                )
+                        }
+
+                        // --------------------------------------------------
+                        // 2.
+                        // OLD: EXIT LEFT -> RIGHT
+                        // NEW: TOP -> BOTTOM
+                        // --------------------------------------------------
+                        1 -> {
                             (
                                     slideInVertically(
-                                        animationSpec = tween(durationMillis = 1000),
+                                        animationSpec = tween(
+                                            durationMillis = enterDuration,
+                                            delayMillis = enterDelay,
+                                            easing = FastOutSlowInEasing,
+                                        ),
+                                        initialOffsetY = { height ->
+                                            -height
+                                        },
+                                    ) togetherWith
+                                            slideOutHorizontally(
+                                                animationSpec = tween(
+                                                    durationMillis = exitDuration,
+                                                    easing = FastOutSlowInEasing,
+                                                ),
+                                                targetOffsetX = { width ->
+                                                    width
+                                                },
+                                            )
+                                    ).using(
+                                    SizeTransform(
+                                        clip = false,
+                                    ),
+                                )
+                        }
+
+                        // --------------------------------------------------
+                        // 3.
+                        // OLD: EXIT BOTTOM -> TOP
+                        // NEW: BOTTOM -> TOP
+                        // --------------------------------------------------
+                        else -> {
+                            (
+                                    slideInVertically(
+                                        animationSpec = tween(
+                                            durationMillis = enterDuration,
+                                            delayMillis = enterDelay,
+                                            easing = FastOutSlowInEasing,
+                                        ),
                                         initialOffsetY = { height ->
                                             height
                                         },
-                                    ) +
-                                            fadeIn(
-                                                animationSpec = tween(durationMillis = 700),
-                                            )
                                     ) togetherWith
-                                    (
                                             slideOutVertically(
-                                                animationSpec = tween(durationMillis = 1000),
+                                                animationSpec = tween(
+                                                    durationMillis = exitDuration,
+                                                    easing = FastOutSlowInEasing,
+                                                ),
                                                 targetOffsetY = { height ->
                                                     -height
                                                 },
-                                            ) +
-                                                    fadeOut(
-                                                        animationSpec = tween(durationMillis = 600),
-                                                    )
                                             )
-                            ).using(
-                            SizeTransform(
-                                clip = false,
-                            ),
-                        )
+                                    ).using(
+                                    SizeTransform(
+                                        clip = false,
+                                    ),
+                                )
+                        }
+                    }
                 },
-                label = "creatorTextTransition",
+                label = "creatorImageTransition",
             ) { index ->
 
                 val card = cards.getOrNull(index)
                     ?: return@AnimatedContent
 
-                Text(
-                    text = card.title,
-                    modifier = Modifier.fillMaxWidth(0.6f),
-                    style = TextStyle(
-                        fontSize = 22.sp,
-                        lineHeight = 26.sp,
-                        fontWeight = FontWeight.Normal,
-                        fontFamily = TrendingNowTypography.Anton,
-                        color = TrendingNowColors.CardTitle,
-                    ),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
+                AsyncImage(
+                    model = card.imageUrl,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .height(275.dp),
+                    contentScale = ContentScale.FillHeight
                 )
             }
-
-            Spacer(Modifier.height(13.dp))
-
-            Text(
-                text = activeCard.description,
-                modifier = Modifier.fillMaxWidth(0.47f).zIndex(0f),
-                style = TextStyle(
-                    fontSize = 12.sp,
-                    lineHeight = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = TrendingNowTypography.Inter,
-                    color = Color(0xFFB6B6B6),
-                ),
-                maxLines = 3,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            Spacer(Modifier.height(30.dp))
-
-            SocialIconRow()
-
-            Spacer(Modifier.height(12.dp))
-
-            GradientAccentButton(
-                text = "Personalize Feed",
-                contentPadding = PaddingValues(horizontal = 15.dp),
-                onClick = onPersonalizeClick,
-            )
+            //        AsyncImage(
+            //            model = activeCard.imageUrl,
+            //            contentDescription = null,
+            //            modifier = Modifier.align(Alignment.BottomEnd).height(230.dp),
+            //            contentScale = ContentScale.FillHeight
+            //        )
+            //        Image(
+            //            painter = painterResource(R.drawable.creator_screen_card_img),
+            //            contentDescription = null,
+            //            modifier = Modifier.align(Alignment.BottomEnd).height(230.dp),
+            //            contentScale = ContentScale.FillHeight
+            //        )
         }
-
-        AnimatedContent(
-            targetState = activeIndex,
-            modifier = Modifier.align(Alignment.BottomEnd),
-            transitionSpec = {
-                when (animationType) {
-
-                    // --------------------------------------------------
-                    // 1.
-                    // OLD: EXIT DOWN
-                    // NEW: RIGHT -> LEFT
-                    // --------------------------------------------------
-                    0 -> {
-                        (
-                                slideInHorizontally(
-                                    animationSpec = tween(
-                                        durationMillis = enterDuration,
-                                        delayMillis = enterDelay,
-                                        easing = FastOutSlowInEasing,
-                                    ),
-                                    initialOffsetX = { width ->
-                                        width
-                                    },
-                                ) togetherWith
-                                        slideOutVertically(
-                                            animationSpec = tween(
-                                                durationMillis = exitDuration,
-                                                easing = FastOutSlowInEasing,
-                                            ),
-                                            targetOffsetY = { height ->
-                                                height
-                                            },
-                                        )
-                                ).using(
-                                SizeTransform(
-                                    clip = false,
-                                ),
-                            )
-                    }
-
-                    // --------------------------------------------------
-                    // 2.
-                    // OLD: EXIT LEFT -> RIGHT
-                    // NEW: TOP -> BOTTOM
-                    // --------------------------------------------------
-                    1 -> {
-                        (
-                                slideInVertically(
-                                    animationSpec = tween(
-                                        durationMillis = enterDuration,
-                                        delayMillis = enterDelay,
-                                        easing = FastOutSlowInEasing,
-                                    ),
-                                    initialOffsetY = { height ->
-                                        -height
-                                    },
-                                ) togetherWith
-                                        slideOutHorizontally(
-                                            animationSpec = tween(
-                                                durationMillis = exitDuration,
-                                                easing = FastOutSlowInEasing,
-                                            ),
-                                            targetOffsetX = { width ->
-                                                width
-                                            },
-                                        )
-                                ).using(
-                                SizeTransform(
-                                    clip = false,
-                                ),
-                            )
-                    }
-
-                    // --------------------------------------------------
-                    // 3.
-                    // OLD: EXIT BOTTOM -> TOP
-                    // NEW: BOTTOM -> TOP
-                    // --------------------------------------------------
-                    else -> {
-                        (
-                                slideInVertically(
-                                    animationSpec = tween(
-                                        durationMillis = enterDuration,
-                                        delayMillis = enterDelay,
-                                        easing = FastOutSlowInEasing,
-                                    ),
-                                    initialOffsetY = { height ->
-                                        height
-                                    },
-                                ) togetherWith
-                                        slideOutVertically(
-                                            animationSpec = tween(
-                                                durationMillis = exitDuration,
-                                                easing = FastOutSlowInEasing,
-                                            ),
-                                            targetOffsetY = { height ->
-                                                -height
-                                            },
-                                        )
-                                ).using(
-                                SizeTransform(
-                                    clip = false,
-                                ),
-                            )
-                    }
-                }
-            },
-            label = "creatorImageTransition",
-        ) { index ->
-
-            val card = cards.getOrNull(index)
-                ?: return@AnimatedContent
-
-            AsyncImage(
-                model = card.imageUrl,
-                contentDescription = null,
-                modifier = Modifier.align(Alignment.BottomEnd).height(275.dp),
-                contentScale = ContentScale.FillHeight
-            )
-        }
-//        AsyncImage(
-//            model = activeCard.imageUrl,
-//            contentDescription = null,
-//            modifier = Modifier.align(Alignment.BottomEnd).height(230.dp),
-//            contentScale = ContentScale.FillHeight
-//        )
-//        Image(
-//            painter = painterResource(R.drawable.creator_screen_card_img),
-//            contentDescription = null,
-//            modifier = Modifier.align(Alignment.BottomEnd).height(230.dp),
-//            contentScale = ContentScale.FillHeight
-//        )
     }
 }
 
