@@ -2,6 +2,7 @@ package com.trending.now.app.feature.creator.presentation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -20,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -75,6 +78,11 @@ fun CreatorScreen(
 
     var searchText by rememberSaveable {
         mutableStateOf("")
+    }
+
+    if (uiState.isLoading && creatorScreenFeed == null) {
+        CreatorScreenLoader(modifier = modifier)
+        return
     }
 
     Column(
@@ -213,9 +221,25 @@ fun CreatorScreen(
     }
 }
 
+@Composable
+private fun CreatorScreenLoader(
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(TrendingNowColors.Background)
+            .safeDrawingPadding(),
+        contentAlignment = Alignment.Center,
+    ) {
+        CircularProgressIndicator(
+            color = TrendingNowColors.RisingCreatorTag,
+        )
+    }
+}
+
 private fun CreatorTrendingPostResponse.displayImageUrl(): String? {
-    return thumbnail
-        ?: media.orEmpty().firstDisplayImageUrl()
+    return media.orEmpty().firstDisplayImageUrl()
 }
 
 private fun CreatorTrendingPostResponse.displayTitle(): String {

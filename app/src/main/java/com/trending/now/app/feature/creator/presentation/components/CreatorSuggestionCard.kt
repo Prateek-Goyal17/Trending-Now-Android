@@ -121,6 +121,11 @@ fun CreatorSuggestionCard(
                     shape = shape,
                 ),
         ) {
+            Image(
+                painter = painterResource(R.drawable.pink_gradient_bg),
+                contentDescription = "Background",
+                contentScale = ContentScale.FillBounds
+            )
             Column(
                 modifier = Modifier
                     .padding(top = 17.dp, bottom = 18.dp, start = 24.dp),
