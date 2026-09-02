@@ -90,7 +90,11 @@ fun CreatorScreen(
             onValueChange = { searchText = it },
             modifier = Modifier.fillMaxWidth(),
             placeholder = "Find your favorite ",
-            highlightedPlaceholder = "Comedian",
+            highlightedPlaceholders = listOf(
+                "Roaster",
+                "Gamer",
+                "Comedian",
+            ),
             leadingIcon = R.drawable.ic_search,
         )
 
