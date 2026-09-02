@@ -27,6 +27,7 @@ import com.trending.now.app.core.common.components.GradientAccentButton
 import com.trending.now.app.core.constants.TrendingNowColors
 import com.trending.now.app.core.constants.TrendingNowTypography
 import com.trending.now.app.feature.auth.domain.model.AuthState
+import com.trending.now.app.feature.auth.domain.model.isGuestLike
 
 @Composable
 fun CreatorConnectionCard(
@@ -85,25 +86,25 @@ fun CreatorConnectionCard(
                     contentPadding = PaddingValues(
                         horizontal = when (authState) {
                             is AuthState.NewUser -> 25.dp
+                            is AuthState.ExistingUser,
                             AuthState.Guest,
                             AuthState.LoggedOut,
-                                -> 33.dp
-                            is AuthState.OldUser -> 33.dp
+                            -> 33.dp
                         }
                     ),
                     text = when (authState) {
                         is AuthState.NewUser -> "Find Favourites"
+                        is AuthState.ExistingUser -> "Visit Profile"
                         AuthState.Guest,
                         AuthState.LoggedOut,
                         -> "Sign Up"
-                        is AuthState.OldUser -> "Visit Profile"
                     },
-                    onClick = when (authState) {
-                        is AuthState.NewUser -> onFindFavouritesClick
-                        AuthState.Guest,
-                        AuthState.LoggedOut,
-                        -> onSignUpClick
-                        is AuthState.OldUser -> onFindFavouritesClick
+                    onClick = {
+                        if (authState.isGuestLike) {
+                            onSignUpClick()
+                        } else {
+                            onFindFavouritesClick()
+                        }
                     },
                 )
             }

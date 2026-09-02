@@ -30,17 +30,23 @@ import com.trending.now.app.R
 import com.trending.now.app.core.common.components.TrendingNowTextField
 import com.trending.now.app.core.constants.TrendingNowColors
 import com.trending.now.app.core.constants.TrendingNowTypography
+import com.trending.now.app.feature.auth.domain.model.AuthState
 import com.trending.now.app.feature.creator.data.remote.CreatorPostMediaResponse
+import com.trending.now.app.feature.creator.data.remote.CreatorScreenResponse
 import com.trending.now.app.feature.creator.data.remote.CreatorTrendingPostResponse
+import com.trending.now.app.feature.creator.data.remote.ExistingFavoriteCreatorResponse
 import com.trending.now.app.feature.creator.data.remote.buzzingCards
 import com.trending.now.app.feature.creator.data.remote.creatorSuggestions
+import com.trending.now.app.feature.creator.data.remote.existingFavoriteCreators
 import com.trending.now.app.feature.creator.data.remote.favoriteCreatorCards
 import com.trending.now.app.feature.creator.data.remote.trendingNowPosts
 import com.trending.now.app.feature.creator.presentation.components.CreatorBuzzCard
 import com.trending.now.app.feature.creator.presentation.components.CreatorIntroCard
 import com.trending.now.app.feature.creator.presentation.components.CreatorIntroCardItem
 import com.trending.now.app.feature.creator.presentation.components.CreatorSuggestionCard
+import com.trending.now.app.feature.creator.presentation.components.ExistingFavoriteCreatorsSection
 import com.trending.now.app.feature.creator.presentation.components.TrendingVideoCard
+import com.trending.now.app.feature.creator.presentation.components.toExistingFavoriteCreatorUiModel
 import com.trending.now.app.feature.creator.presentation.components.toCreatorBuzzCardUiModel
 import com.trending.now.app.feature.creator.presentation.components.toCreatorSuggestionCardUiModel
 
@@ -54,16 +60,7 @@ fun CreatorScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val creatorScreenFeed = uiState.creatorScreenFeed
-    val introCards = creatorScreenFeed
-        ?.favoriteCreatorCards()
-        .orEmpty()
-        .map { card ->
-            CreatorIntroCardItem(
-                title = card.title.orEmpty(),
-                description = card.description.orEmpty(),
-                imageUrl = card.image.orEmpty(),
-            )
-        }
+    val introSection = creatorScreenFeed.toCreatorIntroSection(uiState.authState)
     val trendingNowPosts = creatorScreenFeed
         ?.trendingNowPosts()
         .orEmpty()
@@ -99,13 +96,33 @@ fun CreatorScreen(
 
         Spacer(Modifier.height(35.dp))
 
-        if (introCards.isNotEmpty()) {
-            CreatorIntroCard(
-                cards = introCards,
-                onPersonalizeClick = onPersonalizeFeedClick,
-            )
+        when (introSection) {
+            is CreatorIntroSectionUiState.Guest -> {
+                if (introSection.cards.isNotEmpty()) {
+                    CreatorIntroCard(
+                        cards = introSection.cards,
+                        onPersonalizeClick = onPersonalizeFeedClick,
+                    )
 
-            Spacer(Modifier.height(35.dp))
+                    Spacer(Modifier.height(35.dp))
+                }
+            }
+
+            is CreatorIntroSectionUiState.ExistingUser -> {
+                ExistingFavoriteCreatorsSection(
+                    creators = introSection.creators.map { creator ->
+                        creator.toExistingFavoriteCreatorUiModel()
+                    },
+                    onCreatorClick = { creator ->
+                        onCreatorClick(creator.slug)
+                    },
+                )
+
+                Spacer(Modifier.height(35.dp))
+            }
+
+            CreatorIntroSectionUiState.Hidden,
+            -> Unit
         }
 
         if (trendingNowPosts.isNotEmpty()) {
@@ -204,5 +221,44 @@ private fun CreatorTrendingPostResponse.displayTitle(): String {
 private fun List<CreatorPostMediaResponse>.firstDisplayImageUrl(): String? {
     return firstNotNullOfOrNull { mediaItem ->
         mediaItem.poster ?: mediaItem.thumbnail
+    }
+}
+
+private sealed interface CreatorIntroSectionUiState {
+    data class Guest(
+        val cards: List<CreatorIntroCardItem>,
+    ) : CreatorIntroSectionUiState
+
+    data class ExistingUser(
+        val creators: List<ExistingFavoriteCreatorResponse>,
+    ) : CreatorIntroSectionUiState
+
+    data object Hidden : CreatorIntroSectionUiState
+}
+
+private fun CreatorScreenResponse?.toCreatorIntroSection(
+    authState: AuthState,
+): CreatorIntroSectionUiState {
+    if (this == null) {
+        return CreatorIntroSectionUiState.Hidden
+    }
+
+    return when (authState) {
+        AuthState.Guest,
+        AuthState.LoggedOut,
+        is AuthState.NewUser,
+        -> CreatorIntroSectionUiState.Guest(
+            cards = favoriteCreatorCards().map { card ->
+                CreatorIntroCardItem(
+                    title = card.title.orEmpty(),
+                    description = card.description.orEmpty(),
+                    imageUrl = card.image.orEmpty(),
+                )
+            },
+        )
+
+        is AuthState.ExistingUser -> CreatorIntroSectionUiState.ExistingUser(
+            creators = existingFavoriteCreators(),
+        )
     }
 }

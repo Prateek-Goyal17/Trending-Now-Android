@@ -29,6 +29,8 @@ import com.trending.now.app.core.common.bottom_sheet.AppBottomSheetConfig
 import com.trending.now.app.core.common.bottom_sheet.TrendingNowCommonBottomSheet
 import com.trending.now.app.core.constants.TrendingNowColors
 import com.trending.now.app.feature.auth.domain.model.AuthState
+import com.trending.now.app.feature.auth.domain.model.handleAuthenticatedAction
+import com.trending.now.app.feature.auth.domain.model.profileOrNull
 import com.trending.now.app.feature.me.presentation.components.CreatorConnectionCard
 import com.trending.now.app.feature.me.presentation.components.MeHeader
 import com.trending.now.app.feature.me.presentation.components.ProfileSignupCard
@@ -60,15 +62,12 @@ fun MeScreen(
         config: AppBottomSheetConfig,
         onAuthenticatedClick: () -> Unit,
     ) {
-        when (authState) {
-            is AuthState.NewUser,
-            is AuthState.OldUser,
-            -> onAuthenticatedClick()
-
-            AuthState.Guest,
-            AuthState.LoggedOut,
-            -> restrictedActionConfig = config
-        }
+        authState.handleAuthenticatedAction(
+            onAllowed = onAuthenticatedClick,
+            onRestricted = {
+                restrictedActionConfig = config
+            },
+        )
     }
 
     Column(
@@ -86,9 +85,9 @@ fun MeScreen(
             onSignUpClick = onLoginClick,
         )
         TodayInYourWorld(
-            followingValue = authState.authenticatedProfile()?.favoriteCreatorsCount?.toString() ?: "--",
-            savedValue = authState.authenticatedProfile()?.bookmarkPostsCount?.toString() ?: "--",
-            myActivityValue = authState.authenticatedProfile()?.likedNewsCount?.toString() ?: "--",
+            followingValue = authState.profileOrNull?.favoriteCreatorsCount?.toString() ?: "--",
+            savedValue = authState.profileOrNull?.bookmarkPostsCount?.toString() ?: "--",
+            myActivityValue = authState.profileOrNull?.likedNewsCount?.toString() ?: "--",
             timeSpentValue = "--",
             onFollowingClick = {
                 handleTodayCardClick(
@@ -172,14 +171,6 @@ private fun followingBottomSheetConfig(): AppBottomSheetConfig {
         description = "Create an account to follow creators and keep all their latest updates in one place.",
         primaryButtonText = "Sign Up",
     )
-}
-
-private fun AuthState.authenticatedProfile() = when (this) {
-    is AuthState.NewUser -> profile
-    is AuthState.OldUser -> profile
-    AuthState.Guest,
-    AuthState.LoggedOut,
-    -> null
 }
 
 private fun savedBottomSheetConfig(): AppBottomSheetConfig {

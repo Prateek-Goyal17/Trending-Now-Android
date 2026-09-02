@@ -22,6 +22,24 @@ data class FavoriteCreatorCardResponse(
     val image: String?,
 )
 
+data class ExistingFavoriteCreatorResponse(
+    @SerializedName("_id")
+    val id: String?,
+    val name: String?,
+    val accentColor: String?,
+    val badge: String?,
+    val cardImage: String?,
+    val createdAt: String?,
+    val genres: List<String>?,
+    val image: String?,
+    val role: String?,
+    val socialAccounts: Map<String, String?>?,
+    val suggestionImage: String?,
+    val trendingScore: Double?,
+    val updatedAt: String?,
+    val newFetchCount: Int?,
+)
+
 data class CreatorTrendingPostResponse(
     val id: String?,
     val postId: String?,
@@ -91,6 +109,10 @@ val CreatorScreenResponse.isUser: Boolean
     get() = userType == CreatorScreenUserType.USER
 
 fun CreatorScreenResponse.favoriteCreatorCards(): List<FavoriteCreatorCardResponse> {
+    return sectionData(CreatorScreenSectionType.FAVORITE_CREATORS)
+}
+
+fun CreatorScreenResponse.existingFavoriteCreators(): List<ExistingFavoriteCreatorResponse> {
     return sectionData(CreatorScreenSectionType.FAVORITE_CREATORS)
 }
 

@@ -19,14 +19,8 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-enum class FavoriteCreatorPickerAccess {
-    GuestLocked,
-    NewUser,
-    ExistingUser,
-}
-
 data class PickFavoriteCreatorsUiState(
-    val access: FavoriteCreatorPickerAccess = FavoriteCreatorPickerAccess.GuestLocked,
+    val authState: AuthState = AuthState.Guest,
     val isLoading: Boolean = false,
     val genres: List<Genre> = emptyList(),
     val selectedGenreId: String? = null,
@@ -39,12 +33,12 @@ data class PickFavoriteCreatorsUiState(
         get() = genres.firstOrNull { it.id == selectedGenreId }?.creators.orEmpty()
 
     val canChangeSelection: Boolean
-        get() = access == FavoriteCreatorPickerAccess.NewUser &&
+        get() = authState is AuthState.NewUser &&
             !isSubmitting &&
             !submissionStarted
 
     val canContinue: Boolean
-        get() = access == FavoriteCreatorPickerAccess.NewUser &&
+        get() = authState is AuthState.NewUser &&
             selectedCreatorIds.isNotEmpty() &&
             !isSubmitting
 }
@@ -62,7 +56,7 @@ class PickFavoriteCreatorsViewModel @Inject constructor(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(
         PickFavoriteCreatorsUiState(
-            access = authSessionStore.authState.value.toPickerAccess(),
+            authState = authSessionStore.authState.value,
         ),
     )
     val uiState: StateFlow<PickFavoriteCreatorsUiState> = _uiState.asStateFlow()
@@ -192,13 +186,12 @@ class PickFavoriteCreatorsViewModel @Inject constructor(
     private fun observeAuthentication() {
         viewModelScope.launch {
             authSessionStore.authState.collect { authState ->
-                val access = authState.toPickerAccess()
                 _uiState.update {
-                    it.copy(access = access)
+                    it.copy(authState = authState)
                 }
 
                 if (
-                    access == FavoriteCreatorPickerAccess.ExistingUser &&
+                    authState is AuthState.ExistingUser &&
                     !_uiState.value.isSubmitting
                 ) {
                     completeOnce()
@@ -212,16 +205,5 @@ class PickFavoriteCreatorsViewModel @Inject constructor(
 
         completionSent = true
         _events.send(PickFavoriteCreatorsEvent.Completed)
-    }
-}
-
-private fun AuthState.toPickerAccess(): FavoriteCreatorPickerAccess {
-    return when (this) {
-        AuthState.Guest,
-        AuthState.LoggedOut,
-        -> FavoriteCreatorPickerAccess.GuestLocked
-
-        is AuthState.NewUser -> FavoriteCreatorPickerAccess.NewUser
-        is AuthState.OldUser -> FavoriteCreatorPickerAccess.ExistingUser
     }
 }

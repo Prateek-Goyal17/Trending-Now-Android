@@ -57,6 +57,7 @@ import com.trending.now.app.R
 import com.trending.now.app.core.common.components.GradientAccentButton
 import com.trending.now.app.core.constants.TrendingNowColors
 import com.trending.now.app.core.constants.TrendingNowTypography
+import com.trending.now.app.feature.auth.domain.model.isGuestLike
 import com.trending.now.app.feature.genre.domain.model.Genre
 import com.trending.now.app.feature.genre.domain.model.GenreCreator
 
@@ -101,7 +102,7 @@ fun PickFavoriteCreatorsScreen(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val isGuestLocked = uiState.access == FavoriteCreatorPickerAccess.GuestLocked
+    val isGuestLocked = uiState.authState.isGuestLike
 
     Box(
         modifier = modifier

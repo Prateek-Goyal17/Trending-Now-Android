@@ -47,7 +47,7 @@ fun ProfileSignupCard(
             onEditProfileClick = onSignUpClick,
         )
 
-        is AuthState.OldUser -> UserProfileCard(
+        is AuthState.ExistingUser -> UserProfileCard(
             profile = authState.profile,
             onEditProfileClick = onSignUpClick,
         )
