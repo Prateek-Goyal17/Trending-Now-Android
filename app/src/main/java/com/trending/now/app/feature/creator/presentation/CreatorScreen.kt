@@ -1,6 +1,8 @@
 package com.trending.now.app.feature.creator.presentation
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,9 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
@@ -58,6 +58,7 @@ fun CreatorScreen(
     onPersonalizeFeedClick: () -> Unit,
     onTrendingVideoClick: () -> Unit,
     onCreatorClick: (String) -> Unit,
+    onSearchClick: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: CreatorViewModel = hiltViewModel(),
 ) {
@@ -76,10 +77,6 @@ fun CreatorScreen(
             buzzCard.toCreatorBuzzCardUiModel()
         }
 
-    var searchText by rememberSaveable {
-        mutableStateOf("")
-    }
-
     if (uiState.isLoading && creatorScreenFeed == null) {
         CreatorScreenLoader(modifier = modifier)
         return
@@ -93,18 +90,30 @@ fun CreatorScreen(
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 15.dp, vertical = 18.dp),
     ) {
-        TrendingNowTextField(
-            value = searchText,
-            onValueChange = { searchText = it },
-            modifier = Modifier.fillMaxWidth(),
-            placeholder = "Find your favorite ",
-            highlightedPlaceholders = listOf(
-                "Roaster",
-                "Gamer",
-                "Comedian",
-            ),
-            leadingIcon = R.drawable.ic_search,
-        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = onSearchClick,
+                ),
+        ) {
+            TrendingNowTextField(
+                value = "",
+                onValueChange = {},
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = "Find your favorite ",
+                highlightedPlaceholders = listOf(
+                    "Roaster",
+                    "Gamer",
+                    "Comedian",
+                ),
+                leadingIcon = R.drawable.ic_search,
+                enabled = false,
+                readOnly = true,
+            )
+        }
 
         Spacer(Modifier.height(35.dp))
 

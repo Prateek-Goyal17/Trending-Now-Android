@@ -29,6 +29,8 @@ import com.trending.now.app.feature.creator.presentation.CreatorScreen
 import com.trending.now.app.feature.creator.presentation.CreatorVideoFeedScreen
 import com.trending.now.app.feature.creator.presentation.PickFavoriteCreatorsRoute
 import com.trending.now.app.feature.home.presentation.HomeScreen
+import com.trending.now.app.feature.genre.presentation.CreatorSearchRoute
+import com.trending.now.app.feature.genre.presentation.GenreCreatorsRoute
 import com.trending.now.app.feature.me.presentation.FollowingScreen
 import com.trending.now.app.feature.me.presentation.MeScreen
 import com.trending.now.app.feature.me.presentation.MyActivityScreen
@@ -46,10 +48,17 @@ fun TrendingNowApp() {
     val snackbarScope = rememberCoroutineScope()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
-    val selectedBottomDestination = AppDestination.entries.firstOrNull { item ->
-        currentDestination?.hierarchy?.any { it.route == item.route } == true
-    } ?: AppDestination.Home
-    val showBottomBar = AppDestination.entries.any { item ->
+    val isCreatorSearch = currentDestination?.hierarchy?.any {
+        it.route == AppRoute.CREATOR_SEARCH
+    } == true
+    val selectedBottomDestination = if (isCreatorSearch) {
+        AppDestination.Creator
+    } else {
+        AppDestination.entries.firstOrNull { item ->
+            currentDestination?.hierarchy?.any { it.route == item.route } == true
+        } ?: AppDestination.Home
+    }
+    val showBottomBar = isCreatorSearch || AppDestination.entries.any { item ->
         currentDestination?.hierarchy?.any { it.route == item.route } == true
     }
 
@@ -84,6 +93,39 @@ fun TrendingNowApp() {
                     },
                     onTrendingVideoClick = {
                         navController.navigate(AppRoute.CREATOR_VIDEO_FEED)
+                    },
+                    onCreatorClick = { creatorSlug ->
+                        navController.navigate(AppRoute.creatorDetail(creatorSlug))
+                    },
+                    onSearchClick = {
+                        navController.navigate(AppRoute.CREATOR_SEARCH)
+                    },
+                )
+            }
+            composable(AppRoute.CREATOR_SEARCH) {
+                CreatorSearchRoute(
+                    onGenreClick = { genreId ->
+                        navController.navigate(AppRoute.genreCreators(genreId))
+                    },
+                    onCreatorClick = { creatorSlug ->
+                        navController.navigate(AppRoute.creatorDetail(creatorSlug))
+                    },
+                )
+            }
+            composable(
+                route = AppRoute.GENRE_CREATORS,
+                arguments = listOf(
+                    navArgument(AppRoute.GENRE_ID) {
+                        type = NavType.StringType
+                    },
+                ),
+            ) { backStackEntry ->
+                GenreCreatorsRoute(
+                    genreId = Uri.decode(
+                        backStackEntry.arguments?.getString(AppRoute.GENRE_ID).orEmpty(),
+                    ),
+                    onBack = {
+                        navController.popBackStack()
                     },
                     onCreatorClick = { creatorSlug ->
                         navController.navigate(AppRoute.creatorDetail(creatorSlug))

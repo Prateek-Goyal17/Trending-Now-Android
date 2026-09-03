@@ -56,9 +56,9 @@ import com.trending.now.app.feature.creator.data.remote.CreatorDetailUpNextRespo
 import java.time.Duration
 import java.time.Instant
 
-private const val CREATOR_DETAIL_HERO_IMAGE =
-    "https://testingtrendingnowbe.boostproductivity.online/cdn/images/1786447533794-1542210124ba.webp"
-private const val CREATOR_DETAIL_ROLE = "Stand-up Comedian"
+//private const val CREATOR_DETAIL_HERO_IMAGE =
+//    "https://testingtrendingnowbe.boostproductivity.online/cdn/images/1786447533794-1542210124ba.webp"
+//private const val CREATOR_DETAIL_ROLE = "Stand-up Comedian"
 
 @Composable
 fun CreatorDetailScreen(
@@ -128,6 +128,8 @@ private fun CreatorDetailContent(
             item {
                 CreatorDetailHero(
                     creatorName = creatorName,
+                    role = data?.role?:"--",
+                    imageUrl = data?.bannerImage ?:"",
                     instagramFollowers = data?.socialFollows?.instaFollowers.formatFollowerCount(),
                     youtubeSubscribers = data?.socialFollows?.youtubeSubs.orEmpty().ifBlank { "--" },
                     upNext = data?.upNext,
@@ -188,6 +190,8 @@ private fun CreatorDetailContent(
 @Composable
 private fun CreatorDetailHero(
     creatorName: String,
+    role: String,
+    imageUrl: String,
     instagramFollowers: String,
     youtubeSubscribers: String,
     upNext: CreatorDetailUpNextResponse?,
@@ -206,7 +210,7 @@ private fun CreatorDetailHero(
             ),
     ) {
         AsyncImage(
-            model = CREATOR_DETAIL_HERO_IMAGE,
+            model = imageUrl,
             contentDescription = creatorName,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize(),
@@ -271,7 +275,7 @@ private fun CreatorDetailHero(
                 overflow = TextOverflow.Ellipsis,
             )
             Text(
-                text = CREATOR_DETAIL_ROLE,
+                text = role,
                 color = Color.White,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
