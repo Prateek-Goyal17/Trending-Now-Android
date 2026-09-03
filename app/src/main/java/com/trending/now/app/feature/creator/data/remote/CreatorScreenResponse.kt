@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonElement
 import com.google.gson.annotations.SerializedName
 import com.google.gson.reflect.TypeToken
+import com.trending.now.app.core.data.remote.SocialPostResponse
 
 data class CreatorScreenResponse(
     val success: Boolean,
@@ -40,48 +41,6 @@ data class ExistingFavoriteCreatorResponse(
     val newFetchCount: Int?,
 )
 
-data class CreatorTrendingPostResponse(
-    val id: String?,
-    val postId: String?,
-    val platform: String?,
-    val account: String?,
-    val ownerId: String?,
-    val url: String?,
-    val text: String?,
-    val caption: String?,
-    val normalizedText: String?,
-    val hashtags: List<String>?,
-    val media: List<CreatorPostMediaResponse>?,
-    val mediaCount: Int?,
-    val thumbnail: String?,
-    val isVideo: Boolean?,
-    val isSidecar: Boolean?,
-    val likeCount: Long?,
-    val commentCount: Long?,
-    val unixDate: Long?,
-    val publishedAt: String?,
-    val time: String?,
-    val category: String?,
-    val topic: String?,
-    val topicMeta: CreatorTopicMetaResponse?,
-    @SerializedName("_diversity")
-    val isDiversity: Boolean?,
-)
-
-data class CreatorPostMediaResponse(
-    val type: String?,
-    val videoUrl: String?,
-    val imageUrl: String?,
-    val posterUrl: String?,
-)
-
-data class CreatorTopicMetaResponse(
-    val slug: String?,
-    val label: String?,
-    val isHashtag: Boolean?,
-    val count: Int?,
-)
-
 data class CreatorSuggestionResponse(
     @SerializedName("CreatorName")
     val creatorName: String?,
@@ -99,7 +58,7 @@ data class CreatorBuzzingCardResponse(
     val count: Int?,
     val image: String?,
     val type: String?,
-    val posts: List<CreatorTrendingPostResponse>?,
+    val posts: List<SocialPostResponse>?,
 )
 
 val CreatorScreenResponse.isGuest: Boolean
@@ -116,7 +75,7 @@ fun CreatorScreenResponse.existingFavoriteCreators(): List<ExistingFavoriteCreat
     return sectionData(CreatorScreenSectionType.FAVORITE_CREATORS)
 }
 
-fun CreatorScreenResponse.trendingNowPosts(): List<CreatorTrendingPostResponse> {
+fun CreatorScreenResponse.trendingNowPosts(): List<SocialPostResponse> {
     return sectionData(CreatorScreenSectionType.TRENDING_NOW)
 }
 

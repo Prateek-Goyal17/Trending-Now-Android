@@ -16,7 +16,7 @@ interface CreatorApiService {
     @GET(TrendingNowApiPaths.CREATOR_PAGE)
     suspend fun getCreatorPage(
         @Path("creator") creator: String,
-    ): Response<ResponseBody>
+    ): Response<CreatorDetailResponse>
 
     @GET(TrendingNowApiPaths.CREATOR_RANK)
     suspend fun getCreatorRank(): Response<ResponseBody>

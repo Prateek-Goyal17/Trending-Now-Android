@@ -33,10 +33,10 @@ import com.trending.now.app.R
 import com.trending.now.app.core.common.components.TrendingNowTextField
 import com.trending.now.app.core.constants.TrendingNowColors
 import com.trending.now.app.core.constants.TrendingNowTypography
+import com.trending.now.app.core.data.remote.SocialPostMediaResponse
+import com.trending.now.app.core.data.remote.SocialPostResponse
 import com.trending.now.app.feature.auth.domain.model.AuthState
-import com.trending.now.app.feature.creator.data.remote.CreatorPostMediaResponse
 import com.trending.now.app.feature.creator.data.remote.CreatorScreenResponse
-import com.trending.now.app.feature.creator.data.remote.CreatorTrendingPostResponse
 import com.trending.now.app.feature.creator.data.remote.ExistingFavoriteCreatorResponse
 import com.trending.now.app.feature.creator.data.remote.buzzingCards
 import com.trending.now.app.feature.creator.data.remote.creatorSuggestions
@@ -238,17 +238,17 @@ private fun CreatorScreenLoader(
     }
 }
 
-private fun CreatorTrendingPostResponse.displayImageUrl(): String? {
+private fun SocialPostResponse.displayImageUrl(): String? {
     return media.orEmpty().firstDisplayImageUrl()
 }
 
-private fun CreatorTrendingPostResponse.displayTitle(): String {
+private fun SocialPostResponse.displayTitle(): String {
     return caption ?: text ?: normalizedText.orEmpty()
 }
 
-private fun List<CreatorPostMediaResponse>.firstDisplayImageUrl(): String? {
+private fun List<SocialPostMediaResponse>.firstDisplayImageUrl(): String? {
     return firstNotNullOfOrNull { mediaItem ->
-        mediaItem.posterUrl ?: mediaItem.imageUrl
+        mediaItem.posterUrl ?: mediaItem.poster ?: mediaItem.imageUrl ?: mediaItem.url
     }
 }
 

@@ -2,6 +2,7 @@ package com.trending.now.app.feature.creator.data.repository
 
 import android.util.Log
 import com.trending.now.app.feature.creator.data.remote.CreatorApiService
+import com.trending.now.app.feature.creator.data.remote.CreatorDetailResponse
 import com.trending.now.app.feature.creator.data.remote.FavoriteCreatorRequest
 import com.trending.now.app.feature.creator.data.remote.CreatorScreenResponse
 import com.trending.now.app.feature.creator.domain.repository.CreatorRepository
@@ -24,6 +25,20 @@ class CreatorRepositoryImpl @Inject constructor(
             creatorScreenResponse
         }.onFailure { error ->
             Log.d(TAG, "Creator screen feed failed: ${error::class.java.simpleName}")
+        }
+    }
+
+    override suspend fun getCreatorDetail(creatorSlug: String): Result<CreatorDetailResponse> {
+        return runCatching {
+            val response = creatorApiService.getCreatorPage(creator = creatorSlug)
+            val creatorDetailResponse = response.requireBody()
+            if (!creatorDetailResponse.success) {
+                error("Creator detail request failed.")
+            }
+
+            creatorDetailResponse
+        }.onFailure { error ->
+            Log.d(TAG, "Creator detail failed: ${error::class.java.simpleName}")
         }
     }
 
