@@ -4,6 +4,7 @@ package com.trending.now.app.feature.home.presentation
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
+
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -12,8 +13,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -21,11 +24,13 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,6 +38,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -46,6 +52,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.PaintingStyle
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.addOutline
 import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
@@ -53,7 +60,11 @@ import androidx.compose.ui.graphics.Paint
 import android.graphics.BlurMaskFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -61,9 +72,13 @@ import androidx.compose.ui.unit.sp
 import com.trending.now.app.R
 import com.trending.now.app.core.constants.TrendingNowColors
 import com.trending.now.app.core.constants.TrendingNowTypography
+import com.trending.now.app.feature.creator.presentation.components.CreatorSuggestionBadgeType
+import com.trending.now.app.feature.creator.presentation.components.CreatorSuggestionCard
+import com.trending.now.app.feature.creator.presentation.components.CreatorSuggestionCardUiModel
 import com.trending.now.app.feature.home.presentation.components.CommunityFeedbackCard
 import com.trending.now.app.feature.home.presentation.components.CreatorPostCard
 import com.trending.now.app.feature.home.presentation.components.CreatorReactionCard
+import com.trending.now.app.feature.home.presentation.components.VoteSignupDialog
 import com.trending.now.app.feature.me.presentation.components.MeHeader
 import kotlinx.coroutines.delay
 import kotlin.math.abs
@@ -73,11 +88,61 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp)
 ) {
+    var showVoteSignupDialog by remember { mutableStateOf(false) }
+    val isUserAuthenticated = false 
+
+    val suggestions = remember {
+        listOf(
+            CreatorSuggestionCardUiModel(
+                creatorSlug = "akash-gupta",
+                creatorName = "Akash Gupta",
+                badgeType = CreatorSuggestionBadgeType.RisingCreator,
+                role = "Stand-up Comedian",
+                suggestionLine = buildAnnotatedString {
+                    append("Loved by ")
+                    withStyle(style = SpanStyle(color = TrendingNowColors.RisingCreatorTag)) {
+                        append("+2.5K fans")
+                    }
+                    append(" of Samay Raina")
+                },
+                suggestionImageUrl = "android.resource://com.trending.now.app/drawable/creator_screen_card_img"
+            ),
+            CreatorSuggestionCardUiModel(
+                creatorSlug = "samay-raina",
+                creatorName = "Samay Raina",
+                badgeType = CreatorSuggestionBadgeType.TopCreator,
+                role = "Comedian & Gamer",
+                suggestionLine = buildAnnotatedString {
+                    append("Trending in ")
+                    withStyle(style = SpanStyle(color = TrendingNowColors.RisingCreatorTag)) {
+                        append("Gaming")
+                    }
+                    append(" circles")
+                },
+                suggestionImageUrl = "android.resource://com.trending.now.app/drawable/ic_samay_home"
+            ),
+            CreatorSuggestionCardUiModel(
+                creatorSlug = "bhuvan-bam",
+                creatorName = "Bhuvan Bam",
+                badgeType = CreatorSuggestionBadgeType.TopCreator,
+                role = "Digital Creator",
+                suggestionLine = buildAnnotatedString {
+                    append("Loved by ")
+                    withStyle(style = SpanStyle(color = TrendingNowColors.RisingCreatorTag)) {
+                        append("+10M fans")
+                    }
+                    append(" globally")
+                },
+                suggestionImageUrl = "android.resource://com.trending.now.app/drawable/ic_bhuvam_home"
+            )
+        )
+    }
+
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
             .background(TrendingNowColors.Background)
-            .safeDrawingPadding()
+
             .padding(contentPadding)
     ) {
         item {
@@ -98,22 +163,13 @@ fun HomeScreen(
 
         item {
             CreatorInfoCard(
-                modifier = Modifier.padding(
-                    start = 19.dp,
-                    end = 19.dp,
-                    top = 8.dp
-                )
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
         }
 
         item {
             CreatorReactionCard(
-                modifier = Modifier.padding(
-                    start = 17.dp,
-                    end = 17.dp,
-                    top = 6.dp,
-                    bottom = 6.dp
-                )
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
             )
         }
 
@@ -150,10 +206,111 @@ fun HomeScreen(
                     end = 16.dp,
                     top = 6.dp,
                     bottom = 24.dp
+                ),
+                onVoteAttempt = {
+                    if (!isUserAuthenticated) {
+                        showVoteSignupDialog = true
+                    }
+                }
+            )
+        }
+
+        item {
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 15.dp)
+                    .padding(top = 15.dp, bottom = 35.dp)
+            ) {
+                Text(
+                    text = "You might like",
+                    style = TextStyle(
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        fontFamily = TrendingNowTypography.Inter,
+                        color = TrendingNowColors.CardTitle,
+                    ),
                 )
+
+                Spacer(Modifier.height(20.dp))
+
+                CreatorSuggestionCard(
+                    creatorSuggestions = suggestions,
+                    onExploreClick = { }
+                )
+            }
+        }
+
+        item {
+            Text(
+                text = "More your vibe",
+                color = Color.White,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.SemiBold,
+                fontFamily = TrendingNowTypography.Inter,
+                modifier = Modifier.padding(start = 16.dp, top = 20.dp, bottom = 12.dp)
+            )
+        }
+
+        item {
+            CreatorInfoCard(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                creatorName = "Pranit More",
+                imageRes = R.drawable.ic_me,
+                badgeText = "Similar to carryminati",
+                badgeIcon = R.drawable.ic_creators,
+                showCheckmark = false
+            )
+        }
+
+        item {
+            CreatorReactionCard(
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                text = "Bhuvan Bam's Dhindora 2 announcement has reignited fan excitement."
+            )
+        }
+
+        item {
+            CreatorPostCard(
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 24.dp),
+                tagLabel = "Instagram",
+                postImageRes = R.drawable.ic_samay_home,
+                description = "\"Samay Raina: Still Alive\" is a deeply personal stand-up comedy special released on YouTube in April 2026."
             )
         }
     }
+
+    if (showVoteSignupDialog) {
+        VoteSignupDialog(
+            onDismissRequest = { showVoteSignupDialog = false },
+            onSignUpClick = {
+                showVoteSignupDialog = false
+            }
+        )
+    }
+}
+
+private data class KingItem(
+    val rank: Int,
+    val name: String,
+    val subtitle: String,
+    val igCount: String,
+    val ytCount: String
+)
+
+private val kingsList = listOf(
+    KingItem(rank = 2, name = "Samay Raina", subtitle = "Comedian & Gamer", igCount = "15M", ytCount = "12M"),
+    KingItem(rank = 1, name = "Bhuvan Bam", subtitle = "Indian comedian", igCount = "20M", ytCount = "20M"),
+    KingItem(rank = 3, name = "Pranit More", subtitle = "Indian creator", igCount = "8M", ytCount = "6M")
+)
+
+private val RibbonShape = GenericShape { size, _ ->
+    val notch = size.height * 0.28f
+    moveTo(0f, 0f)
+    lineTo(size.width, 0f)
+    lineTo(size.width, size.height)
+    lineTo(size.width / 2f, size.height - notch)
+    lineTo(0f, size.height)
+    close()
 }
 
 @Composable
@@ -180,7 +337,6 @@ private fun CreatorKingsCarousel() {
         while (true) {
             delay(3000)
 
-            // Only auto-scroll if the user isn't currently touching/scrolling
             if (!listState.isScrollInProgress) {
                 val nextIndex = sequence[sequenceIdx % sequence.size]
                 listState.animateScrollToItem(nextIndex)
@@ -201,13 +357,15 @@ private fun CreatorKingsCarousel() {
 
         Box(
             modifier = Modifier
+
                 .width(388.dp)
                 .height(262.dp)
+                .clip(RoundedCornerShape(10.dp))
         ) {
 
-            // Outer box
             Box(
                 modifier = Modifier
+                    .fillMaxWidth()
                     .fillMaxSize()
                     .innerShadow(
                         shape = RoundedCornerShape(10.dp),
@@ -230,84 +388,103 @@ private fun CreatorKingsCarousel() {
                     )
             )
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        start = 24.dp,
-                        end = 24.dp,
-                        top = 18.dp
-                    ),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = Modifier.fillMaxSize()
             ) {
-                Text(
-                    text = "Creator Kings",
-                    color = Color.White,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = TrendingNowTypography.Inter
-                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            start = 24.dp,
+                            end = 24.dp,
+                            top = 18.dp
+                        ),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Creator Kings",
+                        color = Color.White,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = TrendingNowTypography.Inter
+                    )
 
-                Text(
-                    text = "View all",
-                    color = Color(0xFFFF2D88),
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = TrendingNowTypography.Inter,
-                    modifier = Modifier.clickable {}
+                    Text(
+                        text = "View all",
+                        color = Color(0xFFFF2D88),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = TrendingNowTypography.Inter,
+                        modifier = Modifier.clickable {}
+                    )
+                }
+
+                Box(
+                    modifier = Modifier.weight(1f),
+                    contentAlignment = Alignment.TopCenter
+                ) {
+                    CrownPlaceholder()
+
+                    CreatorCards(
+                        listState = listState,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+
+                CreatorLoader(
+                    activeIndex = activeIndex,
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(bottom = 12.dp)
                 )
             }
-
-            CrownPlaceholder()
-
-            CreatorCards(
-                listState = listState
-            )
-
-            CreatorLoader(
-                activeIndex = activeIndex,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 9.dp)
-            )
         }
     }
 }
 
 @Composable
 private fun BoxScope.CrownPlaceholder() {
-    Box(
+    Image(
+        painter = painterResource(id = R.drawable.ic_crown),
+        contentDescription = null,
         modifier = Modifier
-            .align(Alignment.TopCenter)
-            .padding(top = 52.dp)
-            .width(240.dp)
-            .height(75.dp)
+            .align(Alignment.Center)
+            .width(388.dp)
+            .offset(y = (-90).dp)
+            .graphicsLayer {
+                alpha = 0.95f
+                scaleX = 3.0f
+                scaleY = 3.0f
+            },
+        contentScale = ContentScale.Fit
     )
 }
 
 @Composable
 private fun CreatorCards(
-    listState: LazyListState
+    listState: LazyListState,
+    modifier: Modifier = Modifier
 ) {
     LazyRow(
         state = listState,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(200.dp)
-            .padding(top = 38.dp),
+        modifier = modifier
+            .fillMaxWidth(),
         contentPadding = PaddingValues(
             start = 94.dp,
-            end = 94.dp
+            end = 94.dp,
+            top = 10.dp,
+            bottom = 10.dp
         ),
         horizontalArrangement = Arrangement.spacedBy(30.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.Bottom
     ) {
-        items(3) { index ->
+        items(kingsList.size) { index ->
             CarouselItem(
                 index = index,
                 listState = listState,
-                cardWidth = 200.dp
+                cardWidth = 200.dp,
+                item = kingsList[index]
             )
         }
     }
@@ -317,7 +494,8 @@ private fun CreatorCards(
 private fun CarouselItem(
     index: Int,
     listState: LazyListState,
-    cardWidth: Dp
+    cardWidth: Dp,
+    item: KingItem
 ) {
     val layoutInfo = listState.layoutInfo
 
@@ -383,22 +561,22 @@ private fun CarouselItem(
     Box(
         modifier = Modifier
             .width(cardWidth)
-            .height(180.dp)
+            .height(220.dp)
             .graphicsLayer {
                 scaleX = cardScale
                 scaleY = cardScale
                 alpha = cardAlpha
+                transformOrigin = TransformOrigin(0.5f, 1f)
             }
             .blur(cardBlur)
     ) {
 
-        // Small card
         Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .width(cardWidth)
                 .height(150.dp)
-                .clip(RoundedCornerShape(5.dp))
+                .clip(RoundedCornerShape(12.dp))
         ) {
             Image(
                 painter = painterResource(
@@ -408,9 +586,19 @@ private fun CarouselItem(
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
+
+            Column(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(top = 10.dp, end = 10.dp),
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                SocialBadge(iconRes = R.drawable.ic_instagram, count = item.igCount)
+                SocialBadge(iconRes = R.drawable.ic_youtube, count = item.ytCount)
+            }
         }
 
-        // Character
         Image(
             painter = painterResource(
                 id = R.drawable.ic_bhuvam_home
@@ -418,13 +606,64 @@ private fun CarouselItem(
             contentDescription = null,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .width(180.dp)
-                .height(154.dp)
+                .width(160.dp)
+                .height(185.dp)
                 .graphicsLayer {
                     scaleX = imageScale
                     scaleY = imageScale
+                    transformOrigin = TransformOrigin(0.5f, 1f)
                 },
-            contentScale = ContentScale.Fit
+            contentScale = ContentScale.Fit,
+            alignment = Alignment.BottomCenter
+        )
+
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = item.name,
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Normal,
+                fontFamily = TrendingNowTypography.Anton,
+                lineHeight = 18.sp,
+                letterSpacing = 0.72.sp
+            )
+            Text(
+                text = item.subtitle,
+                color = Color.White.copy(alpha = 0.8f),
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Medium,
+                fontFamily = TrendingNowTypography.Inter
+            )
+        }
+    }
+}
+
+@Composable
+private fun SocialBadge(iconRes: Int, count: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .background(Color.White.copy(alpha = 0.92f))
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+    ) {
+        Image(
+            painter = painterResource(id = iconRes),
+            contentDescription = null,
+            modifier = Modifier.size(14.dp)
+        )
+        Spacer(Modifier.width(4.dp))
+        Text(
+            text = count,
+            color = Color(0xFF1A1A1A),
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = TrendingNowTypography.Inter
         )
     }
 }

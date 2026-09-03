@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -32,12 +33,15 @@ import com.trending.now.app.core.constants.TrendingNowTypography
 @Composable
 fun CreatorInfoCard(
     modifier: Modifier = Modifier,
-    creatorName: String = "CarryMinati"
+    creatorName: String = "CarryMinati",
+    imageRes: Int = R.drawable.ic_carry_home,
+    badgeText: String = "Following",
+    badgeIcon: Int? = null,
+    showCheckmark: Boolean = true
 ) {
     Row(
-        modifier = Modifier
-            .height(50.dp)
-            .padding(start = 19.dp),
+        modifier = modifier
+            .height(50.dp),
 
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -63,14 +67,14 @@ fun CreatorInfoCard(
                 )
         ) {
             Image(
-                painter = painterResource(id = R.drawable.ic_carry_home),
+                painter = painterResource(id = imageRes),
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
         }
 
-        // Name + Following Button
+        // Name + Badge
         Column(
             modifier = Modifier.height(50.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -81,68 +85,76 @@ fun CreatorInfoCard(
             Text(
                 text = creatorName,
                 color = Color.White,
-                fontSize = 20.sp,
+                fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = TrendingNowTypography.Inter
             )
 
-            // Following Button
-            FollowingButton()
+            // Badge
+            CreatorBadge(
+                text = badgeText,
+                icon = badgeIcon,
+                showCheckmark = showCheckmark
+            )
         }
     }
 }
 
 
 @Composable
-private fun FollowingButton() {
+private fun CreatorBadge(
+    text: String,
+    icon: Int?,
+    showCheckmark: Boolean
+) {
     Row(
         modifier = Modifier
             .height(22.dp)
-            .clip(
-                RoundedCornerShape(44.dp)
-            )
-            .background(
-                color = Color(0xFF22000F)
-            )
+            .clip(RoundedCornerShape(44.dp))
+            .background(color = Color(0xFF22000F))
             .border(
                 width = 0.88.dp,
                 color = Color(0xFFFF2D88),
                 shape = RoundedCornerShape(44.dp)
             )
-            .padding(
-                top = 4.4.dp,
-                bottom = 4.4.dp,
-                start = 8.8.dp,
-                end = 8.8.dp
-            ),
+            .padding(horizontal = 8.8.dp, vertical = 4.4.dp),
 
         horizontalArrangement = Arrangement.spacedBy(4.4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
 
-        // Check Circle
-        Box(
-            modifier = Modifier
-                .size(13.dp)
-                .background(
-                    color = Color(0xFFFF2D88),
-                    shape = CircleShape
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "✓",
-                color = Color.Black,
-                fontSize = 9.sp,
-                fontWeight = FontWeight.Bold
+        if (showCheckmark) {
+            // Check Circle
+            Box(
+                modifier = Modifier
+                    .size(13.dp)
+                    .background(
+                        color = Color(0xFFFF2D88),
+                        shape = CircleShape
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "✓",
+                    color = Color.Black,
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        } else if (icon != null) {
+            Image(
+                painter = painterResource(id = icon),
+                contentDescription = null,
+                modifier = Modifier.size(10.dp),
+                colorFilter = ColorFilter.tint(Color(0xFFFF2D88))
             )
         }
 
-        // Following Text
+        // Badge Text
         Text(
-            text = "Following",
+            text = text,
             color = Color(0xFFFF2D88),
-            fontSize = 12.sp,
+            fontSize = 10.sp,
             fontWeight = FontWeight.Medium,
             fontFamily = TrendingNowTypography.Inter
         )

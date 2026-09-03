@@ -1,16 +1,20 @@
 package com.trending.now.app.feature.home.presentation.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -22,12 +26,15 @@ import com.trending.now.app.core.constants.TrendingNowTypography
 
 @Composable
 fun CommunityFeedbackCard(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onVoteAttempt: () -> Unit = {}
 ) {
+    var selectedOption by remember { mutableStateOf<String?>(null) }
+
     Box(
         modifier = modifier
-            .width(380.dp)
-            .height(240.dp)
+            .fillMaxWidth()
+            .height(260.dp)
             .innerShadow(
                 shape = RoundedCornerShape(17.96.dp),
                 color = Color(0xFFFF2D88).copy(alpha = 0.55f),
@@ -43,13 +50,11 @@ fun CommunityFeedbackCard(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Header Row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Community Feedback Chip
                 Row(
                     modifier = Modifier
                         .border(
@@ -93,7 +98,6 @@ fun CommunityFeedbackCard(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // Title
             Text(
                 text = "\"Still Alive\" Is Worth All the Buzz.",
                 color = Color.White,
@@ -103,7 +107,6 @@ fun CommunityFeedbackCard(
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            // Subtitle
             Text(
                 text = "What do you think? 👇",
                 color = Color(0xFFB0B0B0),
@@ -113,22 +116,31 @@ fun CommunityFeedbackCard(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Buttons
             Column(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 FeedbackButton(
                     text = "Support",
-                    iconRes = R.drawable.ic_play, // Using a generic placeholder for thumb up
-                    borderColor = Color(0xFF2F80ED),
-                    textColor = Color.White
+                    iconRes = R.drawable.ic_play,
+                    color = Color(0xFF2F80ED),
+                    isSelected = selectedOption == "Support",
+                    percentage = if (selectedOption != null) 0.65f else 0f,
+                    onClick = {
+                        onVoteAttempt()
+                        selectedOption = "Support"
+                    }
                 )
 
                 FeedbackButton(
                     text = "Oppose",
-                    iconRes = R.drawable.ic_play, // Using a generic placeholder for thumb down
-                    borderColor = Color(0xFFEB5757),
-                    textColor = Color.White
+                    iconRes = R.drawable.ic_play,
+                    color = Color(0xFFEB5757),
+                    isSelected = selectedOption == "Oppose",
+                    percentage = if (selectedOption != null) 0.35f else 0f,
+                    onClick = {
+                        onVoteAttempt()
+                        selectedOption = "Oppose"
+                    }
                 )
             }
         }
@@ -139,25 +151,41 @@ fun CommunityFeedbackCard(
 private fun FeedbackButton(
     text: String,
     iconRes: Int,
-    borderColor: Color,
-    textColor: Color
+    color: Color,
+    isSelected: Boolean,
+    percentage: Float,
+    onClick: () -> Unit
 ) {
+    val borderColor = if (isSelected) color else color.copy(alpha = 0.3f)
+    val borderWidth = if (isSelected) 1.5.dp else 1.dp
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(42.dp)
-            .border(1.dp, borderColor.copy(alpha = 0.5f), RoundedCornerShape(10.dp))
-            .background(Color(0xFF171721), RoundedCornerShape(10.dp)),
-        contentAlignment = Alignment.Center
+            .clip(RoundedCornerShape(10.dp))
+            .background(Color(0xFF171721))
+            .border(borderWidth, borderColor, RoundedCornerShape(10.dp))
+            .clickable { onClick() }
     ) {
+        if (percentage > 0f) {
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(percentage)
+                    .background(color)
+            )
+        }
+
         Row(
+            modifier = Modifier.fillMaxSize(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.Center
         ) {
             Box(
                 modifier = Modifier
                     .size(24.dp)
-                    .border(1.dp, Color.White.copy(alpha = 0.8f), RoundedCornerShape(50)),
+                    .border(1.dp, Color.White.copy(alpha = 0.8f), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Image(
@@ -167,9 +195,10 @@ private fun FeedbackButton(
                     colorFilter = ColorFilter.tint(Color.White)
                 )
             }
+            Spacer(modifier = Modifier.width(12.dp))
             Text(
                 text = text,
-                color = textColor,
+                color = Color.White,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = TrendingNowTypography.Inter
@@ -181,7 +210,8 @@ private fun FeedbackButton(
 @Preview
 @Composable
 fun CommunityFeedbackCardPreview() {
-    Box(modifier = Modifier.padding(16.dp)) {
+    Box(modifier = Modifier.padding(16.dp)
+        ) {
         CommunityFeedbackCard()
     }
 }

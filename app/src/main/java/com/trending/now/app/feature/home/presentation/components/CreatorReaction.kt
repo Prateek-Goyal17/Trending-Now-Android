@@ -24,8 +24,7 @@ import com.trending.now.app.core.constants.TrendingNowTypography
 @Composable
 fun CreatorReactionCard(
     modifier: Modifier = Modifier,
-    creatorName: String = "CarryMinati",
-    reactionText: String = "reacts on samay raina and amitabh bachan KBC."
+    text: String = "CarryMinati reacts on samay raina and amitabh bachan KBC."
 ) {
     Row(
         modifier = modifier
@@ -56,10 +55,10 @@ fun CreatorReactionCard(
 
         // Reaction text
         Text(
-            text = "$creatorName $reactionText",
+            text = text,
             color = Color.White,
-            fontSize = 16.sp,
-            lineHeight = 19.sp,
+            fontSize = 13.sp,
+            lineHeight = 16.sp,
             fontWeight = FontWeight.SemiBold,
             fontFamily = TrendingNowTypography.Inter
         )
