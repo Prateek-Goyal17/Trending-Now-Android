@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil3.compose.AsyncImage
 import com.trending.now.app.R
+import com.trending.now.app.core.common.components.BackNavigationHeader
 import com.trending.now.app.core.common.components.GradientAccentButton
 import com.trending.now.app.core.constants.TrendingNowColors
 import com.trending.now.app.core.constants.TrendingNowTypography
@@ -144,7 +145,10 @@ private fun PickerContent(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.safeDrawingPadding()) {
-        PickerHeader(onBack = onBack)
+        BackNavigationHeader(
+            title="Pick Your Favorite Creators",
+            onBack = onBack
+        )
 
         if (uiState.genres.isNotEmpty()) {
             GenrePicker(
@@ -214,51 +218,6 @@ private fun PickerContent(
 }
 
 @Composable
-private fun PickerHeader(onBack: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 20.dp, end = 20.dp, top = 18.dp, bottom = 22.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Box(
-            modifier = Modifier
-                .size(42.dp)
-                .clip(CircleShape)
-                .background(TrendingNowColors.NavigationCenterSurface)
-                .border(1.dp, TrendingNowColors.NavigationCenterBorder, CircleShape)
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    onClick = onBack,
-                ),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_right_arrow),
-                contentDescription = "Back",
-                modifier = Modifier
-                    .size(18.dp)
-                    .rotate(180f),
-                tint = TrendingNowColors.CardTitle,
-            )
-        }
-
-        Spacer(Modifier.width(20.dp))
-
-        Text(
-            text = "Pick Your Favorite Creators",
-            color = Color(0xFFFFD9EB),
-            fontSize = 21.sp,
-            fontWeight = FontWeight.Bold,
-            fontFamily = TrendingNowTypography.Inter,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-    }
-}
-
-@Composable
 private fun GenrePicker(
     genres: List<Genre>,
     selectedGenreId: String?,
@@ -287,17 +246,19 @@ private fun GenreChip(
     selected: Boolean,
     onClick: () -> Unit,
 ) {
-    val shape = RoundedCornerShape(22.dp)
+    val shape = RoundedCornerShape(20.dp)
     val genreColor = genre.color.toComposeColor() ?: TrendingNowColors.RisingCreatorTag
 
     Row(
         modifier = Modifier
-            .height(42.dp)
             .clip(shape)
             .then(
                 if (selected) {
                     Modifier.background(
-                        brush = Brush.horizontalGradient(TrendingNowColors.CardGradient),
+                        brush = Brush.horizontalGradient(listOf(
+                            Color(0xFFFF2D88),
+                            Color(0xFFFF9055),
+                        )),
                     )
                 } else {
                     Modifier
@@ -306,9 +267,9 @@ private fun GenreChip(
                 },
             )
             .clickable(onClick = onClick)
-            .padding(horizontal = 15.dp),
+            .padding(horizontal = 15.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(11.dp),
     ) {
         AsyncImage(
             model = genre.logoUrl,
