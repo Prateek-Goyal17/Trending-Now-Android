@@ -70,9 +70,9 @@ data class CreatorTrendingPostResponse(
 
 data class CreatorPostMediaResponse(
     val type: String?,
-    val url: String?,
-    val thumbnail: String?,
-    val poster: String?,
+    val videoUrl: String?,
+    val imageUrl: String?,
+    val posterUrl: String?,
 )
 
 data class CreatorTopicMetaResponse(

@@ -248,7 +248,7 @@ private fun CreatorTrendingPostResponse.displayTitle(): String {
 
 private fun List<CreatorPostMediaResponse>.firstDisplayImageUrl(): String? {
     return firstNotNullOfOrNull { mediaItem ->
-        mediaItem.poster ?: mediaItem.thumbnail
+        mediaItem.posterUrl ?: mediaItem.imageUrl
     }
 }
 

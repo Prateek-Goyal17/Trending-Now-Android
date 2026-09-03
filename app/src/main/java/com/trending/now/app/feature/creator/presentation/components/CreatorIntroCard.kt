@@ -347,22 +347,9 @@ fun CreatorIntroCard(
                     contentDescription = null,
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
-                        .height(275.dp),
-                    contentScale = ContentScale.FillHeight
+                        .height(250.dp),
                 )
             }
-            //        AsyncImage(
-            //            model = activeCard.imageUrl,
-            //            contentDescription = null,
-            //            modifier = Modifier.align(Alignment.BottomEnd).height(230.dp),
-            //            contentScale = ContentScale.FillHeight
-            //        )
-            //        Image(
-            //            painter = painterResource(R.drawable.creator_screen_card_img),
-            //            contentDescription = null,
-            //            modifier = Modifier.align(Alignment.BottomEnd).height(230.dp),
-            //            contentScale = ContentScale.FillHeight
-            //        )
         }
     }
 }
