@@ -120,6 +120,9 @@ fun TrendingNowApp() {
                     creatorSlug = Uri.decode(
                         backStackEntry.arguments?.getString(AppRoute.CREATOR_SLUG).orEmpty(),
                     ),
+                    onBack = {
+                        navController.popBackStack()
+                    },
                 )
             }
             composable(AppRoute.ME) {

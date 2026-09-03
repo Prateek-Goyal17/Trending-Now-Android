@@ -103,7 +103,9 @@ fun CreatorBuzzingCardResponse.toCreatorBuzzCardUiModel(): CreatorBuzzCardUiMode
         .firstOrNull { mediaItem ->
             mediaItem.type.equals("image", ignoreCase = true)
         }
-        ?.url
+        ?.let { mediaItem ->
+            mediaItem.imageUrl ?: mediaItem.url
+        }
 
     return CreatorBuzzCardUiModel(
         id = id ?: title,

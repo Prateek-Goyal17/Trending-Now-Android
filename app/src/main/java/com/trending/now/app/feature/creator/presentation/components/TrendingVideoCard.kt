@@ -46,8 +46,6 @@ fun TrendingVideoCard(
     modifier: Modifier = Modifier,
     progress: Float = 0.12f,
     onCardClick: () -> Unit = {},
-    onProfileClick: () -> Unit = {},
-    onPlatformClick: () -> Unit = {},
 ) {
     val cardShape = RoundedCornerShape(8.dp)
     val platformIcon = platformIconFor(platform)
@@ -108,7 +106,6 @@ fun TrendingVideoCard(
                     color = Color(0xFFFF2D88),
                     shape = RoundedCornerShape(10.dp),
                 )
-                .clickable(onClick = onProfileClick)
                 .padding(
                     horizontal = 10.dp,
                     vertical = 6.dp,
@@ -132,8 +129,7 @@ fun TrendingVideoCard(
                 )
                 .size(28.dp)
                 .clip(CircleShape)
-                .background(Color.White)
-                .clickable(onClick = onPlatformClick),
+                .background(Color.White),
             contentAlignment = Alignment.Center,
         ) {
             Image(

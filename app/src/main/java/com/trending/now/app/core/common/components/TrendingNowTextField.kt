@@ -25,14 +25,28 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.trending.now.app.core.constants.TrendingNowColors
 import com.trending.now.app.core.constants.TrendingNowTypography
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.layout.Box
+import androidx.compose.runtime.getValue
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.clipToBounds
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
+
 
 @Composable
 fun TrendingNowTextField(
@@ -41,6 +55,7 @@ fun TrendingNowTextField(
     modifier: Modifier = Modifier,
     placeholder: String = "",
     highlightedPlaceholder: String? = null,
+    highlightedPlaceholders: List<String> = emptyList(),
     @DrawableRes leadingIcon: Int? = null,
     @DrawableRes trailingIcon: Int? = null,
     onTrailingIconClick: (() -> Unit)? = null,
@@ -61,6 +76,50 @@ fun TrendingNowTextField(
 
     val interactionSource = remember {
         MutableInteractionSource()
+    }
+
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
+
+    val placeholderItems = remember(
+        highlightedPlaceholder,
+        highlightedPlaceholders,
+    ) {
+        if (highlightedPlaceholders.isNotEmpty()) {
+            highlightedPlaceholders
+        } else {
+            listOfNotNull(highlightedPlaceholder)
+        }
+    }
+
+    var placeholderIndex by remember {
+        mutableIntStateOf(0)
+    }
+
+
+    val showPlaceholder = value.isEmpty() && !isFocused
+
+    LaunchedEffect(
+        showPlaceholder,
+        placeholderItems,
+    ) {
+        if (!showPlaceholder || placeholderItems.size <= 1) {
+            return@LaunchedEffect
+        }
+
+        while (true) {
+            delay(1_500.milliseconds)
+
+            if (placeholderIndex < placeholderItems.lastIndex) {
+                placeholderIndex++
+            } else {
+                for (index in placeholderItems.lastIndex - 1 downTo 0) {
+                    placeholderIndex = index
+
+                    delay(350.milliseconds)
+                }
+            }
+        }
     }
 
     BasicTextField(
@@ -122,31 +181,74 @@ fun TrendingNowTextField(
                     )
                 }
 
-                Row(
+                Box(
                     modifier = Modifier.weight(1f),
-                    verticalAlignment = Alignment.CenterVertically,
+                    contentAlignment = Alignment.CenterStart,
                 ) {
-                    if (value.isEmpty()) {
-                        Text(
-                            text = buildAnnotatedString {
-                                append(placeholder)
+                    if (showPlaceholder) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = placeholder,
+                                color = placeholderColor,
+                                fontFamily = TrendingNowTypography.Inter,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                maxLines = 1,
+                            )
 
-                                if (!highlightedPlaceholder.isNullOrBlank()) {
-                                    withStyle(
-                                        style = SpanStyle(
-                                            color = highlightedPlaceholderColor,
-                                        ),
-                                    ) {
-                                        append(highlightedPlaceholder)
-                                    }
+                            if (placeholderItems.isNotEmpty()) {
+                                AnimatedContent(
+                                    targetState = placeholderIndex,
+                                    modifier = Modifier
+                                        .clipToBounds(),
+                                    transitionSpec = {
+                                        val movingForward = targetState > initialState
+
+                                        if (movingForward) {
+                                            slideInVertically(
+                                                initialOffsetY = { it },
+                                                animationSpec = tween(
+                                                    durationMillis = 800,
+                                                    easing = FastOutSlowInEasing,
+                                                ),
+                                            ) togetherWith slideOutVertically(
+                                                targetOffsetY = { -it },
+                                                animationSpec = tween(
+                                                    durationMillis = 800,
+                                                    easing = FastOutSlowInEasing,
+                                                ),
+                                            )
+                                        } else {
+                                            slideInVertically(
+                                                initialOffsetY = { -it },
+                                                animationSpec = tween(
+                                                    durationMillis = 350,
+                                                    easing = FastOutSlowInEasing,
+                                                ),
+                                            ) togetherWith slideOutVertically(
+                                                targetOffsetY = { it },
+                                                animationSpec = tween(
+                                                    durationMillis = 350,
+                                                    easing = FastOutSlowInEasing,
+                                                ),
+                                            )
+                                        }
+                                    },
+                                    label = "trendingPlaceholderAnimation",
+                                ) { index ->
+                                    Text(
+                                        text = placeholderItems[index],
+                                        color = highlightedPlaceholderColor,
+                                        fontFamily = TrendingNowTypography.Inter,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        maxLines = 1,
+                                    )
                                 }
-                            },
-                            color = placeholderColor,
-                            fontFamily = TrendingNowTypography.Inter,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            maxLines = 1,
-                        )
+                            }
+                        }
                     }
 
                     innerTextField()

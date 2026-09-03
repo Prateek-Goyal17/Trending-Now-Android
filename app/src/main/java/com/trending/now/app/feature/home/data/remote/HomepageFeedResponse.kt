@@ -1,6 +1,8 @@
 package com.trending.now.app.feature.home.data.remote
 
 import com.google.gson.annotations.SerializedName
+import com.trending.now.app.core.data.remote.SocialPostMediaResponse
+import com.trending.now.app.core.data.remote.SocialPostResponse
 import com.trending.now.app.feature.home.domain.model.CreatorSummary
 import com.trending.now.app.feature.home.domain.model.HomepageFeed
 import com.trending.now.app.feature.home.domain.model.HomepagePost
@@ -51,26 +53,6 @@ data class PostStackResponse(
     val feedbackQuestion: String?,
 )
 
-data class SocialPostResponse(
-    val id: String?,
-    val platform: String?,
-    val account: String?,
-    val url: String?,
-    val caption: String?,
-    val hashtags: List<String>?,
-    val media: List<PostMediaResponse>?,
-    val likeCount: Int?,
-    val commentCount: Int?,
-    val publishedAt: String?,
-    val category: String?,
-)
-
-data class PostMediaResponse(
-    val type: String?,
-    val url: String?,
-    val poster: String?,
-)
-
 fun HomepageFeedResponse.toHomepageFeed(): HomepageFeed {
     return HomepageFeed(
         trendingCreators = data?.trendingCreator.orEmpty().map { it.toCreatorSummary() },
@@ -119,17 +101,21 @@ private fun SocialPostResponse.toHomepagePost(): HomepagePost {
         caption = caption.orEmpty(),
         hashtags = hashtags.orEmpty(),
         media = media.orEmpty().map { it.toHomepagePostMedia() },
-        likeCount = likeCount ?: 0,
-        commentCount = commentCount ?: 0,
+        likeCount = likeCount.toIntOrZero(),
+        commentCount = commentCount.toIntOrZero(),
         publishedAt = publishedAt,
         category = category,
     )
 }
 
-private fun PostMediaResponse.toHomepagePostMedia(): HomepagePostMedia {
+private fun SocialPostMediaResponse.toHomepagePostMedia(): HomepagePostMedia {
     return HomepagePostMedia(
         type = type.orEmpty(),
-        url = url.orEmpty(),
-        poster = poster,
+        url = url ?: imageUrl ?: videoUrl.orEmpty(),
+        poster = poster ?: posterUrl,
     )
+}
+
+private fun Long?.toIntOrZero(): Int {
+    return this?.coerceAtMost(Int.MAX_VALUE.toLong())?.toInt() ?: 0
 }
