@@ -4,9 +4,13 @@ import android.util.Log
 import com.trending.now.app.feature.auth.data.local.AuthSessionStore
 import com.trending.now.app.feature.auth.data.remote.AuthApiService
 import com.trending.now.app.feature.auth.data.remote.RegisterOrLoginRequest
+import com.trending.now.app.feature.auth.data.remote.UpdateUserRequest
 import com.trending.now.app.feature.auth.data.remote.toAuthSession
+import com.trending.now.app.feature.auth.data.remote.toBackendUser
 import com.trending.now.app.feature.auth.domain.model.AuthSession
 import com.trending.now.app.feature.auth.domain.model.AuthUser
+import com.trending.now.app.feature.auth.domain.model.BackendUser
+import com.trending.now.app.feature.auth.domain.model.toAuthProfile
 import com.trending.now.app.feature.auth.domain.repository.BackendAuthRepository
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -44,6 +48,37 @@ class BackendAuthRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun updateUser(
+        firstName: String?,
+        lastName: String?,
+        username: String?,
+    ): Result<BackendUser> {
+        return runCatching {
+            Log.d(TAG, "Update user started. Name: $firstName $lastName")
+            val request = UpdateUserRequest(
+                firstName = firstName,
+                lastName = lastName,
+                username = username,
+            )
+            Log.d(TAG, "Request Body: $request")
+            
+            val response = authApiService.updateUser(
+                body = request,
+            )
+            val userResponse = response.requireBody()
+            if (!userResponse.success) {
+                error(userResponse.message ?: "Update user failed.")
+            }
+
+            val updatedUser = userResponse.toBackendUser()
+            Log.d(TAG, "Update user succeeded. New Name: ${updatedUser.firstName} ${updatedUser.lastName}")
+            authSessionStore.saveProfile(updatedUser.toAuthProfile())
+            updatedUser
+        }.onFailure { error ->
+            Log.d(TAG, "Update user failed: ${error::class.java.simpleName}")
+        }
+    }
+
     override suspend fun logout() {
         Log.d(TAG, "Backend session logout")
         authSessionStore.clear()
@@ -51,7 +86,9 @@ class BackendAuthRepositoryImpl @Inject constructor(
 
     private fun <T> Response<T>.requireBody(): T {
         if (!isSuccessful) {
-            error("Request failed with code ${code()}.")
+            val errorBody = errorBody()?.string()
+            Log.e(TAG, "Request failed: Code=${code()}, Error=$errorBody")
+            error("Request failed with code ${code()}. $errorBody")
         }
 
         return requireNotNull(body()) {

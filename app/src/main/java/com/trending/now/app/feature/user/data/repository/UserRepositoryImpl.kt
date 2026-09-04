@@ -57,13 +57,11 @@ class UserRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateUser(
-        uid: String,
         request: UpdateUserRequest,
     ): Result<BackendUser> {
         return runCatching {
             Log.d(TAG, "Update user started")
             val response = authApiService.updateUser(
-                uid = uid,
                 body = request,
             )
             val userResponse = response.requireBody()

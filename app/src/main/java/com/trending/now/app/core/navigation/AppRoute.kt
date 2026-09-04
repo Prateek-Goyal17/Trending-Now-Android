@@ -9,6 +9,7 @@ object AppRoute {
 
     const val LOGIN = "login"
     const val HOME = "home"
+    const val TRENDING_CREATORS = "trending_creators"
     const val CREATORS = "creators"
     const val PICK_FAVORITE_CREATORS = "pick_favorite_creators"
     const val CREATOR_VIDEO_FEED = "creator_video_feed"
@@ -19,6 +20,7 @@ object AppRoute {
     const val MY_ACTIVITY = "my_activity"
     const val TIME_SPENT = "time_spent"
     const val REPORT_PROBLEM = "report_problem"
+    const val EDIT_PROFILE = "edit_profile"
     const val WEB_VIEW = "web_view/{$WEB_VIEW_TITLE}/{$WEB_VIEW_URL}"
     const val PRIVACY_POLICY_URL = "https://example.com"
     const val COMMUNITY_GUIDELINE_URL = "https://example.com"

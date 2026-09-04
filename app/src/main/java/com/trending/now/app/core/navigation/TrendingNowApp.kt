@@ -29,6 +29,8 @@ import com.trending.now.app.feature.creator.presentation.CreatorScreen
 import com.trending.now.app.feature.creator.presentation.CreatorVideoFeedScreen
 import com.trending.now.app.feature.creator.presentation.PickFavoriteCreatorsRoute
 import com.trending.now.app.feature.home.presentation.HomeScreen
+import com.trending.now.app.feature.home.presentation.TrendingCreators
+import com.trending.now.app.feature.me.presentation.EditProfileScreen
 import com.trending.now.app.feature.me.presentation.FollowingScreen
 import com.trending.now.app.feature.me.presentation.MeScreen
 import com.trending.now.app.feature.me.presentation.MyActivityScreen
@@ -75,7 +77,19 @@ fun TrendingNowApp() {
             startDestination = AppRoute.HOME,
         ) {
             composable(AppRoute.HOME) {
-                HomeScreen(contentPadding = paddingValues)
+                HomeScreen(
+                    contentPadding = paddingValues,
+                    onViewAllCreatorsClick = {
+                        navController.navigate(AppRoute.TRENDING_CREATORS)
+                    }
+                )
+            }
+            composable(AppRoute.TRENDING_CREATORS) {
+                TrendingCreators(
+                    onBackClick = {
+                        navController.popBackStack()
+                    }
+                )
             }
             composable(AppRoute.CREATORS) {
                 CreatorScreen(
@@ -147,6 +161,9 @@ fun TrendingNowApp() {
                     onReportProblemClick = {
                         navController.navigate(AppRoute.REPORT_PROBLEM)
                     },
+                    onEditProfileClick = {
+                        navController.navigate(AppRoute.EDIT_PROFILE)
+                    },
                     onPrivacyPolicyClick = {
                         navController.navigate(
                             AppRoute.webView(
@@ -181,7 +198,18 @@ fun TrendingNowApp() {
                 TimeSpentScreen()
             }
             composable(AppRoute.REPORT_PROBLEM) {
-                ReportProblemScreen()
+                ReportProblemScreen(
+                    onBack = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+            composable(AppRoute.EDIT_PROFILE) {
+                EditProfileScreen(
+                    onBack = {
+                        navController.popBackStack()
+                    }
+                )
             }
             composable(
                 route = AppRoute.WEB_VIEW,

@@ -45,6 +45,7 @@ fun MeScreen(
     onMyActivityClick: () -> Unit,
     onTimeSpentClick: () -> Unit,
     onReportProblemClick: () -> Unit,
+    onEditProfileClick: () -> Unit,
     onPrivacyPolicyClick: () -> Unit,
     onCommunityGuidelineClick: () -> Unit,
     onFindFavouritesClick: () -> Unit,
@@ -83,6 +84,7 @@ fun MeScreen(
         ProfileSignupCard(
             authState = authState,
             onSignUpClick = onLoginClick,
+            onEditProfileClick = onEditProfileClick,
         )
         TodayInYourWorld(
             followingValue = authState.profileOrNull?.favoriteCreatorsCount?.toString() ?: "--",
