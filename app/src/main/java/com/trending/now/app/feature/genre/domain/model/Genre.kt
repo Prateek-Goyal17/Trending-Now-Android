@@ -14,4 +14,7 @@ data class GenreCreator(
     val name: String,
     val imageUrl: String?,
     val role: String,
+    val cardImageUrl: String? = null,
+    val instagramFollowers: Long? = null,
+    val youtubeFollowers: String? = null,
 )

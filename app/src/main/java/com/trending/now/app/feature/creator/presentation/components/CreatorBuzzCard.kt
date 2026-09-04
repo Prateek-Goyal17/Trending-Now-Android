@@ -100,11 +100,9 @@ fun CreatorBuzzingCardResponse.toCreatorBuzzCardUiModel(): CreatorBuzzCardUiMode
     val imageUrl = firstPost
         ?.media
         .orEmpty()
-        .firstOrNull { mediaItem ->
-            mediaItem.type.equals("image", ignoreCase = true)
-        }
+        .firstOrNull()
         ?.let { mediaItem ->
-            mediaItem.imageUrl ?: mediaItem.url
+            mediaItem.imageUrl ?: mediaItem.posterUrl
         }
 
     return CreatorBuzzCardUiModel(

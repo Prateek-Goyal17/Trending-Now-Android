@@ -26,6 +26,13 @@ data class GenreCreatorResponse(
     val name: String?,
     val image: String?,
     val role: String?,
+    val cardImage: String? = null,
+    val stats: GenreCreatorStatsResponse? = null,
+)
+
+data class GenreCreatorStatsResponse(
+    val instaFCount: Long?,
+    val youtubeFCount: String?,
 )
 
 fun GenreResponse.toGenres(): List<Genre> {
@@ -47,6 +54,9 @@ fun GenreResponse.toGenres(): List<Genre> {
                     name = creator.name.orEmpty(),
                     imageUrl = creator.image,
                     role = creator.role.orEmpty(),
+                    cardImageUrl = creator.cardImage,
+                    instagramFollowers = creator.stats?.instaFCount,
+                    youtubeFollowers = creator.stats?.youtubeFCount,
                 )
             }.distinctBy(GenreCreator::id),
         )

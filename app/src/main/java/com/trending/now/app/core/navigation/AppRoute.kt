@@ -4,6 +4,7 @@ import android.net.Uri
 
 object AppRoute {
     const val CREATOR_SLUG = "creatorSlug"
+    const val GENRE_ID = "genreId"
     const val WEB_VIEW_TITLE = "title"
     const val WEB_VIEW_URL = "url"
 
@@ -11,6 +12,8 @@ object AppRoute {
     const val HOME = "home"
     const val TRENDING_CREATORS = "trending_creators"
     const val CREATORS = "creators"
+    const val CREATOR_SEARCH = "creator_search"
+    const val GENRE_CREATORS = "genre_creators/{$GENRE_ID}"
     const val PICK_FAVORITE_CREATORS = "pick_favorite_creators"
     const val CREATOR_VIDEO_FEED = "creator_video_feed"
     const val CREATOR_DETAIL = "creator_detail/{$CREATOR_SLUG}"
@@ -33,4 +36,8 @@ object AppRoute {
     fun creatorDetail(
         creatorSlug: String,
     ): String = "creator_detail/${Uri.encode(creatorSlug)}"
+
+    fun genreCreators(
+        genreId: String,
+    ): String = "genre_creators/${Uri.encode(genreId)}"
 }

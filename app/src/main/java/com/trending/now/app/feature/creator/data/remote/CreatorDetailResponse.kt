@@ -9,6 +9,8 @@ data class CreatorDetailResponse(
 
 data class CreatorDetailDataResponse(
     val creatorName: String?,
+    val role: String?,
+    val bannerImage: String?,
     val socialFollows: CreatorSocialFollowsResponse?,
     val createdAt: String?,
     val updatedAt: String?,
