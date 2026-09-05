@@ -6,7 +6,6 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.PATCH
 import retrofit2.http.POST
-import retrofit2.http.Path
 
 interface AuthApiService {
     @POST(TrendingNowApiPaths.USER)
@@ -17,9 +16,8 @@ interface AuthApiService {
     @GET(TrendingNowApiPaths.USER)
     suspend fun getCurrentUser(): Response<UserResponse>
 
-    @PATCH(TrendingNowApiPaths.USER_BY_UID)
+    @PATCH(TrendingNowApiPaths.USER)
     suspend fun updateUser(
-        @Path("uid") uid: String,
         @Body body: UpdateUserRequest,
     ): Response<UserResponse>
 }

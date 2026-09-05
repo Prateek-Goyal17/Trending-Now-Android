@@ -7,6 +7,7 @@ import com.trending.now.app.feature.auth.data.remote.AuthApiService
 import com.trending.now.app.feature.creator.data.remote.CreatorApiService
 import com.trending.now.app.feature.genre.data.remote.GenreApiService
 import com.trending.now.app.feature.home.data.remote.HomeApiService
+import com.trending.now.app.feature.me.data.remote.MeApiService
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -58,5 +59,11 @@ object NetworkModule {
     @Singleton
     fun provideHomeApiService(retrofit: Retrofit): HomeApiService {
         return retrofit.create(HomeApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideMeApiService(retrofit: Retrofit): MeApiService {
+        return retrofit.create(MeApiService::class.java)
     }
 }

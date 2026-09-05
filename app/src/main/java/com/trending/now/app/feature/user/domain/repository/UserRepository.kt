@@ -9,7 +9,6 @@ interface UserRepository {
     suspend fun getCurrentUser(): Result<BackendUser>
 
     suspend fun updateUser(
-        uid: String,
         request: UpdateUserRequest,
     ): Result<BackendUser>
 }

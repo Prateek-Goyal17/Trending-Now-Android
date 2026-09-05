@@ -71,6 +71,12 @@ fun TrendingNowTextField(
     placeholderColor: Color = Color(0xFFE8E3FF),
     highlightedPlaceholderColor: Color = Color(0xFFFF2F87),
     iconTint: Color = Color(0xFFE8E3FF),
+    borderBrush: Brush = Brush.horizontalGradient(
+        colors = listOf(
+            Color(0xFFFF168B),
+            Color(0xFFFF8A3D),
+        ),
+    ),
 ) {
     val shape = RoundedCornerShape(cornerRadius)
 

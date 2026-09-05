@@ -36,6 +36,7 @@ import com.trending.now.app.feature.auth.domain.model.AuthState
 fun ProfileSignupCard(
     authState: AuthState,
     onSignUpClick: () -> Unit,
+    onEditProfileClick: () -> Unit,
 ) {
     when (authState) {
         AuthState.Guest,
@@ -44,12 +45,12 @@ fun ProfileSignupCard(
 
         is AuthState.NewUser -> UserProfileCard(
             profile = authState.profile,
-            onEditProfileClick = onSignUpClick,
+            onEditProfileClick = onEditProfileClick,
         )
 
         is AuthState.ExistingUser -> UserProfileCard(
             profile = authState.profile,
-            onEditProfileClick = onSignUpClick,
+            onEditProfileClick = onEditProfileClick,
         )
     }
 }
