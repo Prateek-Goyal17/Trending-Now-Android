@@ -1,6 +1,5 @@
 package com.trending.now.app.feature.genre.presentation
 
-import android.graphics.Color as AndroidColor
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,6 +13,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
@@ -44,6 +44,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil3.compose.AsyncImage
@@ -54,6 +55,7 @@ import com.trending.now.app.core.constants.TrendingNowTypography
 import com.trending.now.app.feature.genre.domain.model.Genre
 import com.trending.now.app.feature.genre.domain.model.GenreCreator
 import java.util.Locale
+import androidx.core.graphics.toColorInt
 
 @Composable
 fun CreatorSearchRoute(
@@ -102,7 +104,7 @@ fun CreatorSearchScreen(
             onValueChange = onQueryChange,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 18.dp)
+                .padding(start = 20.dp, top = 18.dp, end = 20.dp, bottom = 0.dp)
                 .focusRequester(focusRequester),
             placeholder = "Find your favorite ",
             highlightedPlaceholders = listOf("Roaster", "Gamer", "Comedian"),
@@ -145,18 +147,20 @@ private fun GenreGrid(
         Text(
             text = "Explore by Genre",
             color = Color(0xFFFFE3F0),
-            fontSize = 23.sp,
-            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.SemiBold,
             fontFamily = TrendingNowTypography.Inter,
-            modifier = Modifier.padding(start = 20.dp, top = 18.dp, bottom = 20.dp),
+            lineHeight = 20.sp,
+            letterSpacing = 0.04.em,
+            modifier = Modifier.padding(start = 20.dp, top = 35.dp, bottom = 20.dp),
         )
 
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 112.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(24.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
             items(items = genres, key = Genre::id) { genre ->
                 GenreCard(
@@ -221,8 +225,9 @@ private fun GenreCard(
             Text(
                 text = genre.name.uppercase(Locale.getDefault()),
                 color = Color.White,
-                fontSize = 25.sp,
-                lineHeight = 27.sp,
+                fontSize = 24.sp,
+                lineHeight = 24.sp,
+                letterSpacing = 0.08.em,
                 fontWeight = FontWeight.Normal,
                 fontFamily = TrendingNowTypography.Anton,
                 maxLines = 1,
@@ -232,7 +237,9 @@ private fun GenreCard(
             Text(
                 text = "${genre.creators.size} ${if (genre.creators.size == 1) "Creator" else "Creators"}",
                 color = Color.White,
-                fontSize = 14.sp,
+                fontSize = 12.sp,
+                lineHeight = 12.sp,
+                letterSpacing = 0.04.em,
                 fontWeight = FontWeight.Bold,
                 fontFamily = TrendingNowTypography.Inter,
             )
@@ -249,10 +256,12 @@ private fun CreatorResultsGrid(
         Text(
             text = "Creators",
             color = Color(0xFFFFE3F0),
-            fontSize = 23.sp,
-            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.SemiBold,
             fontFamily = TrendingNowTypography.Inter,
-            modifier = Modifier.padding(start = 20.dp, top = 18.dp, bottom = 20.dp),
+            lineHeight = 20.sp,
+            letterSpacing = 0.04.em,
+            modifier = Modifier.padding(start = 20.dp, top = 35.dp, bottom = 20.dp),
         )
 
         CreatorGrid(
@@ -274,8 +283,8 @@ fun CreatorGrid(
         columns = GridCells.Fixed(2),
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = bottomPadding),
-        horizontalArrangement = Arrangement.spacedBy(18.dp),
-        verticalArrangement = Arrangement.spacedBy(18.dp),
+        horizontalArrangement = Arrangement.spacedBy(24.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
         items(items = creators, key = GenreCreator::id) { creator ->
             CreatorGridCard(
@@ -326,19 +335,33 @@ private fun CreatorGridCard(
         Box(
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .padding(10.dp)
-                .size(34.dp)
-                .clip(CircleShape)
-                .background(Color.White)
-                .border(1.dp, TrendingNowColors.RisingCreatorTag, CircleShape),
-            contentAlignment = Alignment.Center,
+                .padding(top = 11.dp, end = 10.dp)
+                .size(30.dp)
         ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_right_arrow),
-                contentDescription = "Open $displayName",
-                tint = TrendingNowColors.RisingCreatorTag,
-                modifier = Modifier.size(18.dp),
+            // Drop Shadow (Y: 1.5, Blur: 0)
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .offset(y = 1.5.dp)
+                    .background(TrendingNowColors.RisingCreatorTag, CircleShape)
             )
+
+            // Button Surface
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.White, CircleShape)
+                    .clip(CircleShape)
+                    .clickable(onClick = onClick),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_right_arrow),
+                    contentDescription = "Open $displayName",
+                    tint = TrendingNowColors.RisingCreatorTag,
+                    modifier = Modifier.size(16.dp),
+                )
+            }
         }
 
         Column(
@@ -350,8 +373,9 @@ private fun CreatorGridCard(
             Text(
                 text = displayName,
                 color = Color.White,
-                fontSize = 16.sp,
-                lineHeight = 18.sp,
+                fontSize = 15.sp,
+                lineHeight = 16.5.sp,
+                letterSpacing = 0.04.em,
                 fontWeight = FontWeight.Normal,
                 fontFamily = TrendingNowTypography.Anton,
                 maxLines = 1,
@@ -362,8 +386,9 @@ private fun CreatorGridCard(
                 text = creator.role,
                 color = Color.White,
                 fontSize = 12.sp,
-                lineHeight = 15.sp,
-                fontWeight = FontWeight.Medium,
+                lineHeight = 12.sp,
+                letterSpacing = 0.04.em,
+                fontWeight = FontWeight.SemiBold,
                 fontFamily = TrendingNowTypography.Inter,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -382,6 +407,7 @@ private fun CreatorGridCard(
                 SocialCount(
                     icon = R.drawable.ic_youtube,
                     value = creator.youtubeFollowers?.uppercase(Locale.US) ?: "--",
+                    iconSize = 20.dp
                 )
             }
         }
@@ -392,13 +418,14 @@ private fun CreatorGridCard(
 private fun SocialCount(
     icon: Int,
     value: String,
+    iconSize: androidx.compose.ui.unit.Dp = 14.dp
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Icon(
             painter = painterResource(icon),
             contentDescription = null,
             tint = Color.White,
-            modifier = Modifier.size(13.dp),
+            modifier = Modifier.size(iconSize),
         )
 
         Spacer(Modifier.width(3.dp))
@@ -462,7 +489,7 @@ fun SearchMessageState(
 private fun String?.toComposeColor(): Color? {
     if (isNullOrBlank()) return null
 
-    return runCatching { Color(AndroidColor.parseColor(this)) }.getOrNull()
+    return runCatching { Color(this.toColorInt()) }.getOrNull()
 }
 
 private fun Long?.formatCompactCount(): String {

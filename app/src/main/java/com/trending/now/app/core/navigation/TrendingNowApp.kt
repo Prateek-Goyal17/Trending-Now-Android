@@ -8,7 +8,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavType
@@ -28,7 +27,11 @@ import com.trending.now.app.feature.creator.presentation.CreatorDetailScreen
 import com.trending.now.app.feature.creator.presentation.CreatorScreen
 import com.trending.now.app.feature.creator.presentation.CreatorVideoFeedScreen
 import com.trending.now.app.feature.creator.presentation.PickFavoriteCreatorsRoute
+import com.trending.now.app.feature.genre.presentation.CreatorSearchRoute
+import com.trending.now.app.feature.genre.presentation.GenreCreatorsRoute
 import com.trending.now.app.feature.home.presentation.HomeScreen
+import com.trending.now.app.feature.home.presentation.TrendingCreators
+import com.trending.now.app.feature.me.presentation.EditProfileScreen
 import com.trending.now.app.feature.me.presentation.FollowingScreen
 import com.trending.now.app.feature.me.presentation.MeScreen
 import com.trending.now.app.feature.me.presentation.MyActivityScreen
@@ -46,10 +49,20 @@ fun TrendingNowApp() {
     val snackbarScope = rememberCoroutineScope()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
-    val selectedBottomDestination = AppDestination.entries.firstOrNull { item ->
-        currentDestination?.hierarchy?.any { it.route == item.route } == true
-    } ?: AppDestination.Home
-    val showBottomBar = AppDestination.entries.any { item ->
+
+    val isCreatorSearch = currentDestination?.hierarchy?.any {
+        it.route == AppRoute.CREATOR_SEARCH
+    } == true
+
+    val selectedBottomDestination = if (isCreatorSearch) {
+        AppDestination.Creator
+    } else {
+        AppDestination.entries.firstOrNull { item ->
+            currentDestination?.hierarchy?.any { it.route == item.route } == true
+        } ?: AppDestination.Home
+    }
+
+    val showBottomBar = isCreatorSearch || AppDestination.entries.any { item ->
         currentDestination?.hierarchy?.any { it.route == item.route } == true
     }
 
@@ -75,7 +88,19 @@ fun TrendingNowApp() {
             startDestination = AppRoute.HOME,
         ) {
             composable(AppRoute.HOME) {
-                HomeScreen(contentPadding = paddingValues)
+                HomeScreen(
+                    onViewAllCreatorsClick = {
+                        navController.navigate(AppRoute.TRENDING_CREATORS)
+                    },
+                    contentPadding = paddingValues
+                )
+            }
+            composable(AppRoute.TRENDING_CREATORS) {
+                TrendingCreators(
+                    onBackClick = {
+                        navController.popBackStack()
+                    }
+                )
             }
             composable(AppRoute.CREATORS) {
                 CreatorScreen(
@@ -87,6 +112,9 @@ fun TrendingNowApp() {
                     },
                     onCreatorClick = { creatorSlug ->
                         navController.navigate(AppRoute.creatorDetail(creatorSlug))
+                    },
+                    onSearchClick = {
+                        navController.navigate(AppRoute.CREATOR_SEARCH)
                     },
                 )
             }
@@ -107,6 +135,36 @@ fun TrendingNowApp() {
             }
             composable(AppRoute.CREATOR_VIDEO_FEED) {
                 CreatorVideoFeedScreen()
+            }
+            composable(AppRoute.CREATOR_SEARCH) {
+                CreatorSearchRoute(
+                    onGenreClick = { genreId ->
+                        navController.navigate(AppRoute.genreCreators(genreId))
+                    },
+                    onCreatorClick = { creatorSlug ->
+                        navController.navigate(AppRoute.creatorDetail(creatorSlug))
+                    },
+                )
+            }
+            composable(
+                route = AppRoute.GENRE_CREATORS,
+                arguments = listOf(
+                    navArgument(AppRoute.GENRE_ID) {
+                        type = NavType.StringType
+                    },
+                ),
+            ) { backStackEntry ->
+                GenreCreatorsRoute(
+                    genreId = Uri.decode(
+                        backStackEntry.arguments?.getString(AppRoute.GENRE_ID).orEmpty(),
+                    ),
+                    onBack = {
+                        navController.popBackStack()
+                    },
+                    onCreatorClick = { creatorSlug ->
+                        navController.navigate(AppRoute.creatorDetail(creatorSlug))
+                    },
+                )
             }
             composable(
                 route = AppRoute.CREATOR_DETAIL,
@@ -147,6 +205,9 @@ fun TrendingNowApp() {
                     onReportProblemClick = {
                         navController.navigate(AppRoute.REPORT_PROBLEM)
                     },
+                    onEditProfileClick = {
+                        navController.navigate(AppRoute.EDIT_PROFILE)
+                    },
                     onPrivacyPolicyClick = {
                         navController.navigate(
                             AppRoute.webView(
@@ -181,7 +242,18 @@ fun TrendingNowApp() {
                 TimeSpentScreen()
             }
             composable(AppRoute.REPORT_PROBLEM) {
-                ReportProblemScreen()
+                ReportProblemScreen(
+                    onBack = {
+                        navController.popBackStack()
+                    },
+                )
+            }
+            composable(AppRoute.EDIT_PROFILE) {
+                EditProfileScreen(
+                    onBack = {
+                        navController.popBackStack()
+                    },
+                )
             }
             composable(
                 route = AppRoute.WEB_VIEW,

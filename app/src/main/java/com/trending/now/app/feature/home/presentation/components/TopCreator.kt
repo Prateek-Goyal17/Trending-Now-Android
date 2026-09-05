@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -138,15 +139,21 @@ fun TopCreator(
                             )
                         )
                     )
-                    if (showViewAll)
-                    Text(
-                        text = "View all",
-                        color = Color(0xFFFF2D88),
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = TrendingNowTypography.Inter,
-                        modifier = Modifier.clickable { onViewAllClick() }
-                    )
+                    if (showViewAll) {
+                        TextButton(
+                            onClick = onViewAllClick,
+                            contentPadding = PaddingValues(0.dp),
+                            modifier = Modifier.height(30.dp)
+                        ) {
+                            Text(
+                                text = "View all",
+                                color = Color(0xFFFF2D88),
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = TrendingNowTypography.Inter
+                            )
+                        }
+                    }
                 }
 
                 Box(

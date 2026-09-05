@@ -86,7 +86,7 @@ fun GenreCreatorsScreen(
                     onBack = onBack,
                 )
 
-                Spacer(Modifier.height(28.dp))
+                Spacer(Modifier.height(24.dp))
 
                 if (genre.creators.isEmpty()) {
                     SearchMessageState(

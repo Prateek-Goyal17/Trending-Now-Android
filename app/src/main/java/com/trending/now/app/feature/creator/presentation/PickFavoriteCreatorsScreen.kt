@@ -1,6 +1,17 @@
 package com.trending.now.app.feature.creator.presentation
 
 import android.graphics.Color as AndroidColor
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -50,6 +61,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil3.compose.AsyncImage
@@ -149,6 +161,8 @@ private fun PickerContent(
             title="Pick Your Favorite Creators",
             onBack = onBack
         )
+
+        Spacer(modifier = Modifier.height(35.dp))
 
         if (uiState.genres.isNotEmpty()) {
             GenrePicker(
@@ -397,6 +411,32 @@ private fun CreatorSelectionButton(
     enabled: Boolean,
     onClick: () -> Unit,
 ) {
+    val animationDuration = 500
+
+    val selectionProgress by animateFloatAsState(
+        targetValue = if (selected) 1f else 0f,
+        animationSpec = tween(animationDuration),
+        label = "selectionProgress"
+    )
+
+    val blurRadius by animateDpAsState(
+        targetValue = if (selected) 6.dp else 0.dp,
+        animationSpec = tween(animationDuration),
+        label = "blurRadius"
+    )
+
+    val borderColor by animateColorAsState(
+        targetValue = if (selected) TrendingNowColors.RisingCreatorTag else TrendingNowColors.CardContent,
+        animationSpec = tween(animationDuration),
+        label = "borderColor"
+    )
+
+    val borderBlurRadius by animateDpAsState(
+        targetValue = if (selected) 2.dp else 0.dp,
+        animationSpec = tween(animationDuration),
+        label = "borderBlurRadius"
+    )
+
     Box(
         modifier = Modifier
             .size(48.dp)
@@ -405,29 +445,59 @@ private fun CreatorSelectionButton(
                 contentDescription = if (selected) "Remove $creatorName" else "Add $creatorName"
             }
             .clip(CircleShape)
-            .background(
-                if (selected) TrendingNowColors.RisingCreatorTag else Color.Transparent,
-            )
-            .border(
-                width = 1.dp,
-                color = if (selected) {
-                    TrendingNowColors.RisingCreatorTag
-                } else {
-                    TrendingNowColors.CardContent
-                },
-                shape = CircleShape,
-            )
             .clickable(enabled = enabled, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        Text(
-            text = if (selected) "✓" else "+",
-            color = if (selected) Color.White else TrendingNowColors.CardContent,
-            fontSize = if (selected) 23.sp else 32.sp,
-            lineHeight = 32.sp,
-            fontWeight = FontWeight.Normal,
-            fontFamily = TrendingNowTypography.Inter,
+        // Blurred Border Layer
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .blur(borderBlurRadius)
+                .border(
+                    width = 1.dp,
+                    color = borderColor,
+                    shape = CircleShape,
+                )
         )
+
+        // Blurred Gradient Background
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .blur(blurRadius)
+                .background(
+                    Brush.horizontalGradient(
+                        colors = listOf(
+                            Color(0xFFFF2D88).copy(alpha = selectionProgress),
+                            Color(0xFFFF9055).copy(alpha = selectionProgress)
+                        )
+                    )
+                )
+        )
+
+        AnimatedContent(
+            targetState = selected,
+            transitionSpec = {
+                val duration = animationDuration
+                if (targetState) {
+                    (slideInVertically(animationSpec = tween(duration)) { it } + fadeIn(animationSpec = tween(duration))) togetherWith
+                            (slideOutVertically(animationSpec = tween(duration)) { -it } + fadeOut(animationSpec = tween(duration)))
+                } else {
+                    (slideInVertically(animationSpec = tween(duration)) { -it } + fadeIn(animationSpec = tween(duration))) togetherWith
+                            (slideOutVertically(animationSpec = tween(duration)) { it } + fadeOut(animationSpec = tween(duration)))
+                }
+            },
+            label = "SelectionAnimation"
+        ) { isSelected ->
+            Text(
+                text = if (isSelected) "✓" else "+",
+                color = if (isSelected) Color.White else TrendingNowColors.CardContent,
+                fontSize = if (isSelected) 23.sp else 32.sp,
+                lineHeight = 32.sp,
+                fontWeight = FontWeight.Normal,
+                fontFamily = TrendingNowTypography.Inter,
+            )
+        }
     }
 }
 
@@ -595,11 +665,10 @@ private fun GuestPickerOverlay(onSignUp: () -> Unit) {
                 .padding(horizontal = 48.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_privacy),
+            Image(
+                painter = painterResource(R.drawable.ic_shield_guestuser),
                 contentDescription = null,
                 modifier = Modifier.size(72.dp),
-                tint = TrendingNowColors.RisingCreatorTag,
             )
 
             Spacer(Modifier.height(18.dp))
@@ -608,7 +677,8 @@ private fun GuestPickerOverlay(onSignUp: () -> Unit) {
                 text = "Build Your Personal Feed",
                 color = TrendingNowColors.CardTitle,
                 fontSize = 24.sp,
-                lineHeight = 29.sp,
+                lineHeight = 24.sp,
+                letterSpacing = 0.04.em,
                 fontWeight = FontWeight.Normal,
                 fontFamily = TrendingNowTypography.Anton,
                 textAlign = TextAlign.Center,
@@ -619,14 +689,15 @@ private fun GuestPickerOverlay(onSignUp: () -> Unit) {
             Text(
                 text = "Create an account to choose your favorite creators and get a feed tailored just for you.",
                 color = TrendingNowColors.CardTitle,
-                fontSize = 17.sp,
-                lineHeight = 22.sp,
-                fontWeight = FontWeight.Medium,
+                fontSize = 18.sp,
+                lineHeight = 18.sp,
+                letterSpacing = 0.04.em,
+                fontWeight = FontWeight.SemiBold,
                 fontFamily = TrendingNowTypography.Inter,
                 textAlign = TextAlign.Center,
             )
 
-            Spacer(Modifier.height(30.dp))
+            Spacer(Modifier.height(35.dp))
 
             GradientAccentButton(
                 text = "Sign Up",
