@@ -7,6 +7,8 @@ object AppRoute {
     const val GENRE_ID = "genreId"
     const val WEB_VIEW_TITLE = "title"
     const val WEB_VIEW_URL = "url"
+    const val VIDEO_INDEX = "videoIndex"
+    const val VIDEO_POST_ID = "videoPostId"
 
     const val LOGIN = "login"
     const val HOME = "home"
@@ -14,7 +16,7 @@ object AppRoute {
     const val CREATOR_SEARCH = "creator_search"
     const val GENRE_CREATORS = "genre_creators/{$GENRE_ID}"
     const val PICK_FAVORITE_CREATORS = "pick_favorite_creators"
-    const val CREATOR_VIDEO_FEED = "creator_video_feed"
+    const val CREATOR_VIDEO_FEED = "creator_video_feed/{$VIDEO_INDEX}?$VIDEO_POST_ID={$VIDEO_POST_ID}"
     const val CREATOR_DETAIL = "creator_detail/{$CREATOR_SLUG}"
     const val ME = "me"
     const val FOLLOWING = "following"
@@ -34,6 +36,9 @@ object AppRoute {
     fun creatorDetail(
         creatorSlug: String,
     ): String = "creator_detail/${Uri.encode(creatorSlug)}"
+
+    fun creatorVideoFeed(index: Int, postId: String): String =
+        "creator_video_feed/$index?$VIDEO_POST_ID=${Uri.encode(postId)}"
 
     fun genreCreators(
         genreId: String,

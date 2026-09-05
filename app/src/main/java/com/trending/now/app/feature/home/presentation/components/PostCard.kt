@@ -301,8 +301,8 @@ private fun PostMetadata(
 }
 
 @Composable
-private fun PostCommentPreview(
-    comment: PostCardComment,
+internal fun PostCommentPreview(
+    comment: PostCardComment = DefaultAnimatedComments.first(),
     modifier: Modifier = Modifier,
 ) {
     val comments = remember(comment) {

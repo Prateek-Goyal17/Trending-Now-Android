@@ -19,6 +19,9 @@ data class CreatorUiState(
     val authState: AuthState = AuthState.Guest,
     val isLoading: Boolean = false,
     val creatorScreenFeed: CreatorScreenResponse? = null,
+    val videoFeed: List<TrendingVideo>? = null,
+    val isVideoMuted: Boolean = true,
+    val errorMessage: String? = null,
 )
 
 @HiltViewModel
@@ -37,6 +40,19 @@ class CreatorViewModel @Inject constructor(
         observeAuthentication()
     }
 
+    fun prepareVideoFeed(videos: List<TrendingVideo>) {
+        // Keep the exact card order for the duration of this viewing session.
+        _uiState.update { it.copy(videoFeed = videos.toList()) }
+    }
+
+    fun toggleVideoSound() {
+        _uiState.update { it.copy(isVideoMuted = !it.isVideoMuted) }
+    }
+
+    fun retry() {
+        viewModelScope.launch { fetchCreatorScreenFeed() }
+    }
+
     private fun observeAuthentication() {
         viewModelScope.launch {
             authSessionStore.authState.collectLatest { authState ->
@@ -50,7 +66,7 @@ class CreatorViewModel @Inject constructor(
 
     private suspend fun fetchCreatorScreenFeed() {
         _uiState.update {
-            it.copy(isLoading = true)
+            it.copy(isLoading = true, errorMessage = null)
         }
 
         creatorRepository.getCreatorScreenFeed()
@@ -64,7 +80,7 @@ class CreatorViewModel @Inject constructor(
             }
             .onFailure {
                 _uiState.update {
-                    it.copy(isLoading = false)
+                    it.copy(isLoading = false, errorMessage = "Couldn't load trending videos.")
                 }
             }
     }

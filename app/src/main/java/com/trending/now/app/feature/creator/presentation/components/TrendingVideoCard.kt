@@ -26,14 +26,12 @@ import androidx.compose.ui.draw.innerShadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.shadow.Shadow
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil3.compose.AsyncImage
 import com.trending.now.app.R
 import com.trending.now.app.core.constants.TrendingNowTypography
 
@@ -44,12 +42,14 @@ fun TrendingVideoCard(
     title: String,
     platform: String,
     modifier: Modifier = Modifier,
-    progress: Float = 0.12f,
+    videoUrl: String? = null,
+    autoPlay: Boolean = false,
     onCardClick: () -> Unit = {},
 ) {
     val cardShape = RoundedCornerShape(8.dp)
     val platformIcon = platformIconFor(platform)
     val platformLabel = platformLabelFor(platform)
+    val playback = rememberVideoPlayback(videoUrl = videoUrl, enabled = autoPlay)
 
     Box(
         modifier = modifier
@@ -59,10 +59,9 @@ fun TrendingVideoCard(
             .background(Color.Transparent)
             .clickable(onClick = onCardClick),
     ) {
-        AsyncImage(
-            model = imageUrl,
-            contentDescription = title,
-            contentScale = ContentScale.Crop,
+        TrendingVideoSurface(
+            playback = playback,
+            posterUrl = imageUrl,
             modifier = Modifier.fillMaxSize(),
         )
 
@@ -139,7 +138,7 @@ fun TrendingVideoCard(
             )
         }
 
-        Box(
+        if (!playback.isPlaying) Box(
             modifier = Modifier
                 .align(Alignment.Center),
             contentAlignment = Alignment.Center,
@@ -176,9 +175,9 @@ fun TrendingVideoCard(
                 modifier = Modifier.height(13.dp),
             )
 
-            VideoProgressBar(
-                progress = progress,
-            )
+            if (videoUrl != null) {
+                VideoProgressBar(progress = playback.progress)
+            }
         }
     }
 }

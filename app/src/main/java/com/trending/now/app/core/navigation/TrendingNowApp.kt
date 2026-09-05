@@ -27,6 +27,7 @@ import com.trending.now.app.feature.auth.presentation.LoginScreen
 import com.trending.now.app.feature.creator.presentation.CreatorDetailScreen
 import com.trending.now.app.feature.creator.presentation.CreatorScreen
 import com.trending.now.app.feature.creator.presentation.CreatorVideoFeedScreen
+import com.trending.now.app.feature.creator.presentation.CreatorViewModel
 import com.trending.now.app.feature.creator.presentation.PickFavoriteCreatorsRoute
 import com.trending.now.app.feature.home.presentation.HomeScreen
 import com.trending.now.app.feature.genre.presentation.CreatorSearchRoute
@@ -91,8 +92,10 @@ fun TrendingNowApp() {
                     onPersonalizeFeedClick = {
                         navController.navigate(AppRoute.PICK_FAVORITE_CREATORS)
                     },
-                    onTrendingVideoClick = {
-                        navController.navigate(AppRoute.CREATOR_VIDEO_FEED)
+                    onTrendingVideoClick = { index, postId ->
+                        navController.navigate(AppRoute.creatorVideoFeed(index, postId)) {
+                            launchSingleTop = true
+                        }
                     },
                     onCreatorClick = { creatorSlug ->
                         navController.navigate(AppRoute.creatorDetail(creatorSlug))
@@ -147,8 +150,25 @@ fun TrendingNowApp() {
                     },
                 )
             }
-            composable(AppRoute.CREATOR_VIDEO_FEED) {
-                CreatorVideoFeedScreen()
+            composable(
+                route = AppRoute.CREATOR_VIDEO_FEED,
+                arguments = listOf(
+                    navArgument(AppRoute.VIDEO_INDEX) { type = NavType.IntType },
+                    navArgument(AppRoute.VIDEO_POST_ID) {
+                        type = NavType.StringType
+                        defaultValue = ""
+                    },
+                ),
+            ) { backStackEntry ->
+                val creatorEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(AppRoute.CREATORS)
+                }
+                CreatorVideoFeedScreen(
+                    initialIndex = backStackEntry.arguments?.getInt(AppRoute.VIDEO_INDEX) ?: 0,
+                    initialPostId = backStackEntry.arguments?.getString(AppRoute.VIDEO_POST_ID).orEmpty(),
+                    onBack = { navController.popBackStack() },
+                    viewModel = hiltViewModel<CreatorViewModel>(creatorEntry),
+                )
             }
             composable(
                 route = AppRoute.CREATOR_DETAIL,

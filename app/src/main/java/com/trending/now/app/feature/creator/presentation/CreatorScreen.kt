@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
@@ -22,8 +23,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -33,8 +40,6 @@ import com.trending.now.app.R
 import com.trending.now.app.core.common.components.TrendingNowTextField
 import com.trending.now.app.core.constants.TrendingNowColors
 import com.trending.now.app.core.constants.TrendingNowTypography
-import com.trending.now.app.core.data.remote.SocialPostMediaResponse
-import com.trending.now.app.core.data.remote.SocialPostResponse
 import com.trending.now.app.feature.auth.domain.model.AuthState
 import com.trending.now.app.feature.creator.data.remote.CreatorScreenResponse
 import com.trending.now.app.feature.creator.data.remote.ExistingFavoriteCreatorResponse
@@ -42,7 +47,6 @@ import com.trending.now.app.feature.creator.data.remote.buzzingCards
 import com.trending.now.app.feature.creator.data.remote.creatorSuggestions
 import com.trending.now.app.feature.creator.data.remote.existingFavoriteCreators
 import com.trending.now.app.feature.creator.data.remote.favoriteCreatorCards
-import com.trending.now.app.feature.creator.data.remote.trendingNowPosts
 import com.trending.now.app.feature.creator.presentation.components.CreatorBuzzCard
 import com.trending.now.app.feature.creator.presentation.components.CreatorIntroCard
 import com.trending.now.app.feature.creator.presentation.components.CreatorIntroCardItem
@@ -56,7 +60,7 @@ import com.trending.now.app.feature.creator.presentation.components.toCreatorSug
 @Composable
 fun CreatorScreen(
     onPersonalizeFeedClick: () -> Unit,
-    onTrendingVideoClick: () -> Unit,
+    onTrendingVideoClick: (Int, String) -> Unit,
     onCreatorClick: (String) -> Unit,
     onSearchClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -65,9 +69,10 @@ fun CreatorScreen(
     val uiState by viewModel.uiState.collectAsState()
     val creatorScreenFeed = uiState.creatorScreenFeed
     val introSection = creatorScreenFeed.toCreatorIntroSection(uiState.authState)
-    val trendingNowPosts = creatorScreenFeed
-        ?.trendingNowPosts()
-        .orEmpty()
+    val trendingVideos = remember(creatorScreenFeed) {
+        creatorScreenFeed?.trendingVideos().orEmpty()
+    }
+    var viewport by remember { mutableStateOf(Rect.Zero) }
 
     val creatorSuggestions = creatorScreenFeed?.creatorSuggestions().orEmpty()
     val buzzingCards = creatorScreenFeed
@@ -87,6 +92,7 @@ fun CreatorScreen(
             .fillMaxSize()
             .background(TrendingNowColors.Background)
             .safeDrawingPadding()
+            .onGloballyPositioned { viewport = it.boundsInWindow() }
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 15.dp, vertical = 18.dp),
     ) {
@@ -146,7 +152,7 @@ fun CreatorScreen(
             -> Unit
         }
 
-        if (trendingNowPosts.isNotEmpty()) {
+        if (trendingVideos.isNotEmpty()) {
             Text(
                 text = "Trending Now",
                 style = TextStyle(
@@ -162,13 +168,33 @@ fun CreatorScreen(
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                items(items = trendingNowPosts) { post ->
+                itemsIndexed(items = trendingVideos, key = { _, video -> video.id }) { index, video ->
+                    var cardBounds by remember { mutableStateOf(Rect.Zero) }
+                    val visibleBounds = cardBounds.intersect(viewport)
+                    val isVisible = cardBounds.width > 0 && cardBounds.height > 0 &&
+                        visibleBounds.width > 0 && visibleBounds.height > 0 &&
+                        visibleBounds.width * visibleBounds.height >= cardBounds.width * cardBounds.height * 0.6f
                     TrendingVideoCard(
-                        username = post.account.orEmpty(),
-                        title = post.displayTitle(),
-                        imageUrl = post.displayImageUrl(),
-                        platform = post.platform.orEmpty(),
-                        onCardClick = onTrendingVideoClick,
+                        username = video.username,
+                        title = video.title,
+                        imageUrl = video.posterUrl,
+                        platform = video.platform,
+                        videoUrl = if (index == 0) video.videoUrl else null,
+                        autoPlay = index == 0 && isVisible,
+                        modifier = Modifier.onGloballyPositioned { coordinates ->
+                            val position = coordinates.positionInWindow()
+                            // Keep the full card area; clipped bounds overestimate visibility.
+                            cardBounds = Rect(
+                                position.x,
+                                position.y,
+                                position.x + coordinates.size.width,
+                                position.y + coordinates.size.height,
+                            )
+                        },
+                        onCardClick = {
+                            viewModel.prepareVideoFeed(trendingVideos)
+                            onTrendingVideoClick(index, video.id)
+                        },
                     )
                 }
             }
@@ -244,20 +270,6 @@ private fun CreatorScreenLoader(
         CircularProgressIndicator(
             color = TrendingNowColors.RisingCreatorTag,
         )
-    }
-}
-
-private fun SocialPostResponse.displayImageUrl(): String? {
-    return media.orEmpty().firstDisplayImageUrl()
-}
-
-private fun SocialPostResponse.displayTitle(): String {
-    return caption ?: text ?: normalizedText.orEmpty()
-}
-
-private fun List<SocialPostMediaResponse>.firstDisplayImageUrl(): String? {
-    return firstNotNullOfOrNull { mediaItem ->
-        mediaItem.posterUrl ?: mediaItem.poster ?: mediaItem.imageUrl ?: mediaItem.url
     }
 }
 
