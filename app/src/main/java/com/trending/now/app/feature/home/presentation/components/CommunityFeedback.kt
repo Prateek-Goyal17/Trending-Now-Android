@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.trending.now.app.R
 import com.trending.now.app.core.constants.TrendingNowTypography
+import com.trending.now.app.feature.home.presentation.innerShadow
 
 @Composable
 fun CommunityFeedbackCard(
